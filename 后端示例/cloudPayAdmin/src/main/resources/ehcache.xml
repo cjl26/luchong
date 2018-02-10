@@ -1,0 +1,33 @@
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="ehcache.xsd"> 
+         
+    <diskStore path="java.io.tmpdir"/>   
+    
+    <defaultCache 
+        maxElementsInMemory="10000" 
+        eternal="false" 
+        timeToIdleSeconds="3600" 
+        timeToLiveSeconds="3600" 
+        overflowToDisk="true" 
+    />
+    
+     <!-- 任务大厅cache -->
+    <cache name="kickOutCache"
+           maxElementsInMemory="10000"
+           maxElementsOnDisk="1000"
+           eternal="false"
+           overflowToDisk="true"
+           timeToIdleSeconds="900"
+           timeToLiveSeconds="3600"
+           memoryStoreEvictionPolicy="LFU"
+       />     
+       
+       <cache name="shiro-activeSessionCache"
+           maxEntriesLocalHeap="2000"
+           eternal="false"
+           timeToIdleSeconds="3600"
+           timeToLiveSeconds="3600"
+           overflowToDisk="false"
+           statistics="true">
+    </cache>
+</ehcache>

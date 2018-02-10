@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>新增用户</title>
+<!-- Tell the browser to be responsive to screen width -->
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+<#include "../common/header.html">
+
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+	<OBJECT id="myActivex"
+		classid="clsid:46059496-E96D-45D7-9DB4-2240411F1AF1"
+		codebase="/embed/gzyct_ytp.cab#version=1,0,0,10" width="0" height="0"></OBJECT>
+	<div class="wrapper">
+
+		<!-- 	顶部和左侧菜单的jsp s -->
+		<#include "../common/menu.html">
+		<!-- 	顶部和左侧菜单的jsp e -->
+
+		<!-- Content Wrapper. Contains page content -->
+		<div class="content-wrapper">
+			<!-- Content Header (Page header) -->
+			<section class="content-header">
+				<h1>新增用户</h1>
+			</section>
+
+
+
+			<!-- Main content -->
+			<section class="content" style="padding-bottom: 0px;" id="content">
+				<!-- general form elements -->
+				<div class="box box-primary" style="width: 1000px; margin: 0 auto;">
+					<div class="box-header with-border">
+						<h3 class="box-title">用户信息</h3>
+					</div>
+					<!-- /.box-header -->
+					<!-- form start -->
+					<form role="form"  action="/cloudpay/admin/user/addAction" method="post" id="conditionForm">
+						<div class="box-body">
+							<div class="form-group">
+								<label for="username">登陆名</label>
+								<input type="text" class="form-control" id="username" name="username" value="">
+							</div>
+							<div class="form-group">
+								<label for="account">姓名</label> 
+								<input type="text" class="form-control" id="account" name="account" value=''>
+							</div>
+							<div class="form-group">
+								<label for="phone">手机号码</label> 
+								<input type="text" class="form-control" id="phone" name="phone">
+							</div>
+						</div>
+						<!-- /.box-body  @click="submit"-->
+						<div class="box-footer">
+						   	<label class="control-label" id="errorLabel" for="inputError" style="color:#dd4b39; width: 370px; max-width: 500px"></label><br/>
+							<button type="button" class="btn btn-primary" @click="submit">提交</button>
+							<button type="reset" class="btn btn-primary" >清空</button>
+							<button type="button" class="btn btn-primary" @click="back">返回</button>
+						</div>
+					</form>
+				</div>
+				<!-- /.box -->
+			</section>
+			<!-- /.content -->
+		</div>
+
+	</div>
+	<!-- ./wrapper -->
+</body>
+<script>
+$(function () {
+	var vm = new Vue(
+			{
+				el : '#content',
+				methods : {
+					back : function(){
+						history.back(-1);
+						//alert("back");
+					},
+					submit : function(){
+						//alert("test");
+						//alert("submit formValidator = " + validForm().form());
+						if(validForm().form() == false)
+						{
+							return;
+						}
+						var phone = $("#phone").val();
+						var username = $("#username").val();
+						var account = $("#account").val();
+					    $.ajax({
+					         url: '/cloudpay/admin/user/addAction',    
+					         type: 'POST',
+					         data: { phone: phone, username: username, account : account },
+					         success: function (result) {    
+					             var resultObj = JSON.parse(result);
+					             if(resultObj.result_code == '0')
+					           	 {
+					            	 alert("添加用户成功");
+					            	 $("#phone").val("");
+					            	 $("#username").val("");
+					            	 $("#account").val("");
+					           	 }
+					             else
+					             {
+					            	 $("#errorLabel").html(resultObj.err_msg);
+					             }
+					         },
+					         error: function (result) {    
+					             alert("绑定请求失败 = " + JSON.stringify(result));    
+					         }    
+					    });
+					}
+				}
+			})
+	
+	function validForm(){
+		return $("#conditionForm").validate(
+				{
+					onkeyup : false,
+					focusInvalid : false,  //错误时,错误选项不会得到焦点
+					focusCleanup : true,   //得到焦点时，清空错误提示信息
+					submitHandler : function() { //表单提交句柄,为一回调函数，带一个参数：form
+						vm.submitForm();
+					},
+					rules : {						
+						username : {
+							required:true,
+							maxlength:16,
+							remote:{
+								url : "/cloudpay/admin/user/usernameValidation",
+								type  :"post",
+								dataType : "json",
+								data:{
+									username : function(){
+										return $("#username").val();
+									}
+								}
+							}
+						},
+						account : {
+						},
+						phone : {
+							maxlength:11,
+							number:true
+						}
+					},
+					messages : {
+						username : {
+							required:"用户名不能为空",
+							maxlength:"用户名不大于16位",
+							remote:"用户名已经存在"
+						},
+						account : {
+						},
+						phone : {
+							maxlength:"手机号不大于11位",
+							number:"手机号为数字"
+						}
+					}
+				});
+	}
+	$(validForm());
+	/*
+	var formValidator = $("#conditionForm").validate(
+			{
+				onkeyup : false,
+				focusInvalid : false,  //错误时,错误选项不会得到焦点
+				focusCleanup : true,   //得到焦点时，清空错误提示信息
+				submitHandler : function() { //表单提交句柄,为一回调函数，带一个参数：form
+					vm.submitForm();
+				},
+				rules : {						
+					username : {
+						maxlength:16,
+						//minlength:16,
+						remote:{
+							url : "/admin/user/usernameValidation",
+							type  :"post",
+							dataType : "json",
+							data:{
+								username : function(){
+									alert("to rules");
+									return $("#username").val();
+								}
+							}
+						}
+					}
+				},
+				messages : {
+					username : {
+						maxlength:"用户名不大于16位",
+						//minlength:"卡号必须为16位",
+						remote:"卡号"
+
+					}
+				}
+			});
+	*/
+});
+
+/*
+ 
+ 						require:true,
+						maxlength:32,
+						remote:{
+							url:"/admin/user/add/usernameValidation",
+							type:"post",
+							dataType:"json",
+							data:{
+								username : function(){
+									alert("to rules");
+									return $("#username").val();
+								}
+							}
+						}
+						
+require:"用户名不能为空",
+maxlength:"用户名最大32位",
+remote:"用户名已经被使用"						
+						
+						
+ */
+
+</script>
+
+<script src="${resurcePath}/cloudpay/js/common/dataTable.js"></script>
+
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+  <header class="main-header">
+  
+    <!-- Logo -->
+    <a href="/adminlte/index2.html" class="logo">
+      <!-- mini logo for sidebar mini 50x50 pixels -->
+      <span class="logo-mini"><b>A</b>LT</span>
+      <!-- logo for regular state and mobile devices -->
+      <span class="logo-lg" style="font-size: 17px;"><b><!-- 饭堂应用 -->喜只猫 </b>管理系统</span>
+    </a>
+    <!-- Header Navbar: style can be found in header.less -->
+    <nav class="navbar navbar-static-top">
+      <!-- Sidebar toggle button-->
+      <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </a>
+      
+      <#if adminUser?exists>
+      <div class="navbar-custom-menu">
+        <ul class="nav navbar-nav">
+         
+          
+          <!-- User Account: style can be found in dropdown.less -->
+           <li class="dropdown user user-menu">
+			<!-- class="dropdown-toggle" data-toggle="dropdown" -->			
+ 			<a href="/cloudpay/admin/toResetPasswordPage">
+              <span class="hidden-xs">修改密码</span>
+            </a> 
+          </li>
+          <li class="dropdown user user-menu">
+			<!-- class="dropdown-toggle" data-toggle="dropdown" -->			
+ 			<a href="#">
+              <span class="hidden-xs">${Session.adminUser.userName!}</span>
+            </a> 
+          </li>
+           <li class="dropdown user user-menu">
+           <!-- class="dropdown-toggle" data-toggle="dropdown" -->
+            <a href="/cloudpay/admin/user/logout">
+              <span class="hidden-xs">注销登录</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <#else>
+      <div class="navbar-custom-menu">
+    	 
+         <ul class="nav navbar-nav">          
+          
+           <li class="dropdown user user-menu">
+            <a href="/cloudpay/admin/user/login"><!--  class="dropdown-toggle" data-toggle="dropdown" -->
+              <span class="hidden-xs">登录</span>
+            </a>
+          </li>
+        </ul> 
+      </div>     
+      </#if>
+    </nav>
+  </header>
+  <!-- Left side column. contains the logo and sidebar -->
+  <aside class="main-sidebar">
+    <!-- sidebar: style can be found in sidebar.less -->
+    <section class="sidebar">
+      <ul class="sidebar-menu" data-widget="tree" id="treeMenu">
+      
+<!--         <li class="treeview">
+          <a href="#">
+            <i class="fa fa-folder"></i> <span>系统管理</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="/admin/user/list"><i class="fa fa-circle-o"></i> 用户管理</a></li>
+            <li><a href="/adminlte/index2.html"><i class="fa fa-circle-o"></i> 角色管理</a></li>
+            <li><a href="/adminlte/index2.html"><i class="fa fa-circle-o"></i> 权限管理</a></li>
+            <li><a href="/adminlte/index2.html"><i class="fa fa-circle-o"></i> 菜单管理</a></li>
+          </ul>
+        </li>
+       
+        <li class="treeview">
+          <a href="#">
+            <i class="fa fa-folder"></i>
+            <span>卡片管理</span>
+            <span class="pull-right-container">
+                  <i class="fa fa-angle-left pull-right"></i>
+                </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="/cloudpay/card/toListPage"><i class="fa fa-circle-o"></i> 查看卡片列表</a></li>
+            <li><a href="/cloudpay/blackHis/listData"><i class="fa fa-circle-o"></i> 黑名单管理</a></li>          
+          </ul>
+        </li>        
+        <li class="treeview">
+          <a href="#">
+            <i class="fa fa-folder"></i>
+            <span>交易查询</span>
+            <span class="pull-right-container">
+                  <i class="fa fa-angle-left pull-right"></i>
+                </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="/merchant/acctTrans/list"><i class="fa fa-circle-o"></i> 查看交易记录</a></li>
+            
+          </ul>
+        </li>
+        
+         <li><a href="#"><i class="fa fa-folder"></i> 菜单管理</a></li> -->
+    
+      </ul>
+    </section>
+    <!-- /.sidebar -->
+  </aside>
+<script>
+//菜单的html语句
+var treeMenuStr = "";
+$(function() {
+	treeMenuStr = window.localStorage.getItem("treeMenuStr");
+	if(!isEmpty(treeMenuStr)) {
+		 $("#treeMenu").html(treeMenuStr);
+	} else {
+		 $.ajax({
+			 url : '/cloudpay/menu/getMenuListData',
+			 type : "POST",
+			 dataType : "json",
+			 success : function(result) {
+				 
+				 $.each(result,function(i,n) {
+					
+					 //如果是顶级节点
+					 if(n.parentId == -1) {
+						 createMenuStr(n,result);
+					 }
+					 
+				 });
+				 $("#treeMenu").html(treeMenuStr);
+				 
+				 //设置入本地缓存
+				 window.localStorage.setItem("treeMenuStr",treeMenuStr);
+			 }
+		 });	
+	}
+	
+	//每20分钟清楚一次本地菜单缓存
+	setInterval('window.localStorage.removeItem("treeMenuStr");',3600000 );
+});
+
+
+function createMenuStr(data,result) {
+	//如果有孩子
+	if(hasChildren(data,result)) {
+		treeMenuStr += '<li class="treeview">'
+					+       '<a href="' + (isEmpty(data.url) ? '#' : data.url) + '">'
+					+          '<i class="' + typeClassStr(data.type) + '"></i> <span>' + data.name + '</span>'
+					+          '<span class="pull-right-container">'
+					+             '<i class="fa fa-angle-left pull-right"></i>'
+					+          ' </span>'
+					+        '</a>'
+					+        '<ul class="treeview-menu">';
+		
+		$.each(result,function(i,n) {
+			if(data.id == n.parentId) {
+				createMenuStr(n);
+			}
+		});
+		treeMenuStr += '    </ul>'
+				    +  '</li>'
+	} else {     //如果无孩子节点
+		treeMenuStr += '<li><a href="' + (isEmpty(data.url) ? '#' : data.url) + '"><i class="' +　typeClassStr(data.type) + '"></i> ' + data.name  + '</a></li>'	
+	}
+	
+}
+
+/**
+ * 检查这个菜单是否有孩子节点
+ */
+function hasChildren(data,result) {
+	var hasChildren = false;
+	$.each(result,function(i,n) {
+		if(n.parentId == data.id) {
+			hasChildren = true;
+			return hasChildren
+		}
+	})
+	
+	return hasChildren;
+}
+
+//根据 菜单类型决定 class
+function typeClassStr(type) {
+	if(type == 1) {
+		return "fa fa-folder";
+	} else if (type == 2) {
+		return "fa fa-circle-o";
+	}	
+	return "";
+}
+
+</script>

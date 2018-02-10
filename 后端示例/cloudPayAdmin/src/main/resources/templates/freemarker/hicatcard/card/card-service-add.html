@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!-- Tell the browser to be responsive to screen width -->
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+<#include "../../common/header.html">
+
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+	<div class="wrapper">
+
+		<!-- 	顶部和左侧菜单的jsp s -->
+		<#include "../../common/menu.html">
+		<!-- 	顶部和左侧菜单的jsp e -->
+
+		<!-- Content Wrapper. Contains page content -->
+		<div class="content-wrapper">
+			<!-- Content Header (Page header) -->
+			<section class="content-header">
+				<h1>增加服务项</h1>
+			</section>
+
+			<!-- Main content -->
+			<section class="content" style="padding-bottom: 0px;" id="content">
+				<!-- general form elements -->
+				<div class="box box-primary" style="width: 1000px; margin: 0 auto;">
+					<div class="box-header with-border">
+						<h3 class="box-title">增加服务项</h3>
+					</div>
+					<!-- /.box-header -->
+					<!-- form start -->
+					<form action="/hicatcard/card/addService" method="post" id="roleForm"  enctype="multipart/form-data">
+					    <input type="hidden" id="cardId" name="cardId" value="${Request.cardId!}"/> 
+						<div class="box-body">
+							<div class="form-group">
+								<label for="cardName">卡片名称</label>
+								<input type="text" class="form-control" id="cardName" name="cardName" value="${Request.card.cardName!}" disabled="disabled"/>
+							</div>
+							<div class="form-group">
+								<label for="parentId">可选服务项</label> 
+									<select class="form-control select2" style="width: 100%;" name="serviceId" id="serviceId">
+										<#list serviceList as service>										
+ 		 									<option value="${service.serviceId}">${service.serviceName}</option>									
+										</#list>
+								</select>
+							</div>
+							<div class="form-group">
+								<label for="serviceTime">次数</label>
+								<input type="text" class="form-control" id="serviceTime" name="serviceTime"/>
+							</div>
+						</div>
+						<!-- /.box-body  @click="submit"-->
+						<div class="box-footer">
+						   	<label class="control-label" id="errorLabel" for="inputError" style="color:#dd4b39; width: 370px; max-width: 500px"></label><br/>
+							<button type="submit" class="btn btn-primary">提交</button>
+							<button type="reset" class="btn btn-primary" >清空</button>
+						</div>
+					</form>
+				</div>
+				<!-- /.box -->
+			</section>
+			<!-- /.content -->
+		</div>
+
+	</div>
+	<!-- ./wrapper -->
+</body>
+<script>
+$(function() {
+	//校验器
+	var formValidator = $("#roleForm").validate({
+				onkeyup : false,
+				focusInvalid : false,  //错误时,错误选项不会得到焦点
+				focusCleanup : true,   //得到焦点时，清空错误提示信息
+				rules : {						
+					serviceTime : {
+						required:true,
+						number:true,
+						digits:true
+					},
+				},
+				messages : {		
+					serviceTime : {
+						required:"请输入次数",
+						number:"只能输入数字",
+						digits:"只能输入整数"
+					}
+				}
+			});
+});
+
+</script>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!-- Tell the browser to be responsive to screen width -->
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  
+  <#include "../common/header.html">
+	
+ <style>
+ 	tfoot th {
+ 		border: 0px !important;
+ 	}
+ </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+  <div class="wrapper">	
+  
+  <!-- 	顶部和左侧菜单的jsp s -->
+  <#include "../common/menu.html">
+  <!-- 	顶部和左侧菜单的jsp e -->
+  
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>
+       	日期统计数据
+      </h1>
+    </section>
+    
+    <section class="content-header condition clearfix ">
+    <form action="#" id="fromCondition"> 
+     <div class="form-group" >
+         <label>商户名称:</label>
+         <input type="text" class="form-control" name="search_EQ_STRING_orgName">
+     </div>
+      <div class="form-group" >
+         <label>终端编号:</label>
+         <input type="text" class="form-control" name="search_EQ_STRING_termCode">
+     </div>    
+     <!-- Date range -->
+          <div class="form-group">
+              <label>创建时间:</label>
+
+               <div class="input-group">
+                  <div class="input-group-addon">
+                  <i class="fa fa-calendar"></i>
+               </div>
+              <input type="text" class="form-control pull-right daterange" name="search_DATERANGE_STRING_transDate"/>
+             </div>
+            <!-- /.input group -->
+        </div>
+     <!-- /.form group -->
+       <div class="form-group"  style="margin-top: 28px;margin-left: 15px;">
+              <input type="submit" value="查询" id="submit"/>&nbsp&nbsp
+              <input type="reset" value="清空" id="reset"/>
+        </div>
+    </form>
+    </section>
+
+    <!-- Main content -->
+    <section class="content" style="padding-bottom: 0px;">
+      <div class="row">
+        <div class="col-xs-12">
+         
+
+          <div class="box">
+          
+            <!-- /.box-header -->
+            <div class="box-body">
+              <table id="dataTable" class="table table-bordered table-striped" style="min-width: 1830px">
+                <thead>
+                  <tr>
+                    <th>选择</th>  
+                    <th>日期</th>                         
+                    <th>商户代码</th>
+                    <th>商户名称</th>
+                    <th>终端号</th>
+                    <th>交易总笔数</th>
+                    <th>交易总金额</th>
+                    <th>交易成功笔数</th>
+                    <th>交易成功金额</th>        
+                    <th>交易失败笔数</th>        
+                    <th>交易失败金额</th>                              
+                  </tr>
+                </thead>
+                 <tfoot>
+                   <tr>
+                     <th id="totalRecord"></th>      
+                     <th id="totalCount"></th>
+                     <th id="totalMoney"></th>
+                     <th id="failCount"></th>      
+                     <th id="failMoney"></th>      
+                     <th id="successCount"></th>      
+                     <th id="successMoney"></th>                         
+                     <th></th>
+                     <th></th>     
+                     <th></th>     
+                     <th></th>           
+                   </tr>
+                 </tfoot>
+              </table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+    </section>
+    <!-- /.content -->
+    
+      <#include "../common/errorMsg.html">
+  </div>
+ 
+</div>
+<!-- ./wrapper -->
+</body>
+<script>
+  //存放选中行的id的数组
+  var selected = [];
+  
+  //adminlte表格的对象
+  var datatable = null;
+  var formValidator = null;
+  
+  $(function () {
+		    
+	   var vm = new Vue({
+	 		el: '#fromCondition',
+		    methods: {
+		    	submitForm: function () {
+				  	datatable.draw();				
+		        }
+      	  }
+  	  })
+	   
+	   //校验器
+		formValidator = $("#fromCondition").validate(
+				{
+					onkeyup : false,
+					focusInvalid : false,  //错误时,错误选项不会得到焦点
+					focusCleanup : true,   //得到焦点时，清空错误提示信息
+					submitHandler : function() { //表单提交句柄,为一回调函数，带一个参数：form
+						vm.submitForm();
+					},
+					rules : {						
+						search_EQ_STRING_cardNum : {
+							maxlength:16,
+							minlength:16
+						}
+					},
+					messages : {
+						
+						search_EQ_STRING_cardNum : {
+							maxlength:"卡号必须为16位",
+							minlength:"卡号必须为16位"
+						}
+					}
+				});
+       
+     
+	   datatable = $('#dataTable').DataTable({
+           'paging'      : true,
+           'lengthChange': true,
+           'searching'   : false,
+           'ordering'    : true,
+           'info'        : true,
+           'autoWidth'   : true,
+           "scrollX"		: true,
+           "scrollY"		: true ,  
+           "processing"	: true,
+           "serverSide"	: true,
+           "footerCallback": function ( row, data, start, end, display ){   
+        	 $.ajax({
+				 url : '/cloudpay/transdaily/getTransDailyData',
+				 type : "POST",
+				 async:true,
+				 dataType : "json",
+				 data :$("#fromCondition").serializeJson(),
+				 success : function(result) {
+					var totalRecord = 0;
+					var totalCount = 0;
+					var totalMoney = 0;
+					var failCount = 0;
+					var failMoney = 0;
+					var successCount = 0;
+					var successMoney = 0;
+					var data = result.data;
+					$.each(data,function(i,n) {
+						totalRecord = totalRecord + 1;
+						totalCount = totalCount + n.transTotalCount;
+						totalMoney = totalMoney + n.transTotalAmount;
+						failCount = failCount + n.transFailCount;
+						failMoney = failMoney + n.transFailAmount;
+						successCount = successCount + n.transSuccCount;
+						successMoney = successMoney + n.transSuccAmount
+					});
+					$(".dataTables_scrollFoot #totalRecord").html("总记录数: " + totalRecord + "条");
+					$(".dataTables_scrollFoot #totalCount").html("交易笔数: " + totalCount + "笔");
+					//前端 bigdecimal，用法和java相同
+					$(".dataTables_scrollFoot #totalMoney").html("交易金额: " +  new BigDecimal(totalMoney+"").multiply(new BigDecimal("0.01")).setScale(2, MathContext.ROUND_HALF_UP).toString() + "元");
+					$(".dataTables_scrollFoot #failCount").html("失败笔数: " + failCount + "笔");
+					$(".dataTables_scrollFoot #failMoney").html("失败金额: " + new BigDecimal(failMoney+"").multiply(new BigDecimal("0.01")).setScale(2, MathContext.ROUND_HALF_UP).toString() + "元");
+					$(".dataTables_scrollFoot #successCount").html("成功笔数: " + successCount + "笔");
+					$(".dataTables_scrollFoot #successMoney").html("成功金额: " + new BigDecimal(successMoney+"").multiply(new BigDecimal("0.01")).setScale(2, MathContext.ROUND_HALF_UP).toString() + "元");					
+				 }
+		    });      	   
+           },
+           "pagingType": "full_numbers",
+           "language": {
+               "lengthMenu":   "显示 _MENU_ 条记录",
+               "zeroRecords":  "没有符合条件的记录",
+               "info":         "第 _PAGE_ 页,共 _PAGES_ 页",
+               "infoEmpty":    "没有符合条件的记录",
+               "paginate": {
+            	   "first":     "第一页",
+            	   "next":      "下一页",
+            	   "previous":  "上一页",
+            	   "last":      "最后一页"
+                }           	  
+           },
+           //如果查询条件有校验，需要加这个
+           "preDrawCallback": function( settings ) {
+        	   if(!isEmpty(formValidator)) {
+        		   if(!formValidator.valid()) {
+            		   return false;
+            	   }
+        	   }  
+        	},
+           "drawCallback": function( settings ) {
+        	   //每次重画后,清空选中的记录
+	    		selected.splice(0,selected.length);
+           },
+           "ajax": {
+               "url": "/cloudpay/transdaily/getTransDailyData",
+               "type": "POST",
+               "data": function ( d ) {
+            	  var formData = $("#fromCondition").serializeJson();
+            	  for(var obj in formData)  {
+            		  d[obj+""] = formData[obj];
+            	  }
+              }
+           },
+           "columns": [   
+			   { "data": "id", "orderable": false,"render":function(data, type, full, meta) {
+	                 return  '<input type="checkbox" value="' + data + '">';
+               }},   
+               { "data": "transDate"},
+               { "data": "orgCode" },
+               { "data": "orgName" },
+               { "data": "termCode" },
+               { "data": "transTotalCount"},
+               { "data": "transTotalAmount","render":function(data, type, full, meta){ return data * 0.01 } },
+               { "data": "transSuccCount"},
+               { "data": "transSuccAmount","render":function(data, type, full, meta){ return data * 0.01 } },
+               { "data": "transFailCount"},              
+               { "data": "transFailAmount","render":function(data, type, full, meta){ return data * 0.01 } },
+			]           
+         })
+});
+ 
+</script>
+ <script src="${resurcePath}/cloudpay/js/common/dataTable.js"></script>
+</html>

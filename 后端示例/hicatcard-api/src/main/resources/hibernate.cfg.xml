@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+    "-//Hibernate/Hibernate Configuration DTD//EN"
+    "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+  <session-factory>
+    <property name="connection.url">jdbc:oracle:thin:@10.240.1.110:1521:oc</property>
+    <property name="connection.driver_class">oracle.jdbc.OracleDriver</property>
+    <mapping class="com.gzyct.m.api.busi.db.Testtable"/>
+    <mapping resource="com/gzyct/m/api/busi/db/TCardBind.hbm.xml"/>
+    <mapping class="com.gzyct.m.api.busi.db.TCardBind"/>
+    <mapping resource="com/gzyct/m/api/busi/db/Testtable.hbm.xml"/>
+    <mapping class="com.gzyct.m.api.busi.db.TTest"/>
+    <mapping class="com.gzyct.m.api.busi.db.entity.TCardBind"/>
+      <mapping class="com.gzyct.m.api.busi.db.entity.TExtAdvertisement"/>
+      <mapping class="com.gzyct.m.api.busi.db.entity.TUserAcctTrans"/>
+      <mapping class="com.gzyct.m.api.busi.db.entity.TYctBranch"/>
+      <mapping class="com.gzyct.m.api.busi.db.entity.TActivity"/>
+    <mapping class="com.gzyct.m.api.busi.db.entity.TExtBranch"/>
+    <mapping class="com.gzyct.m.api.busi.db.entity.TExtBranchCatalog"/>
+      <mapping class="com.gzyct.m.api.busi.db.entity.TExtNews"/>
+      <mapping class="com.gzyct.m.api.busi.db.entity.yctpay.TMerchantAppConfig"/>
+      <mapping class="com.gzyct.m.api.busi.db.entity.yctpay.TMerchantAcct"/>
+      <mapping class="com.gzyct.m.api.busi.db.entity.pay.TUserAcctTrans"/>
+      <mapping class="com.gzyct.m.api.busi.db.entity.yctpay.TMerchantAcctTrans"/>
+      <mapping class="com.gzyct.m.api.busi.db.entity.yctpay.TYctpayOrderNotify"/>
+      <mapping class="com.gzyct.m.api.busi.db.entity.yctpay.VYctpayOrderRefundUser"/>
+      <mapping class="com.gzyct.m.api.busi.db.entity.yctpay.TYctpayOrderRefund"/>
+      <mapping class="com.gzyct.m.api.busi.db.entity.yctpay.TThirdPaymentUserAcct"/>
+      <mapping class="com.gzyct.m.api.busi.db.entity.cloudpay.TCloudPayTranOrder"/>
+      <mapping class="com.gzyct.m.api.busi.db.entity.yctpay.TMerchant"/>
+      <mapping class="com.gzyct.m.api.busi.db.entity.cloudpay.TCloudpayBlackHis"/>
+      <mapping class="com.gzyct.m.api.busi.db.entity.cloudpay.TCloudpayCard"/>
+      <mapping class="com.gzyct.m.api.busi.db.entity.cloudpay.TCloudpayTranOrder"/>
+      <mapping class="com.gzyct.m.api.busi.db.entity.cloudpay.TCloudpayWhitelist"/>
+      <mapping class="com.gzyct.m.api.busi.db.entity.student.TPayFeeInfo"/>
+      <mapping class="com.gzyct.m.api.busi.db.entity.student.TPayChannelAvaiable"/>
+    <mapping class="com.gzyct.m.api.busi.db.entity.student.TPayChannelAvailable"/>
+    <!-- DB schema will be updated if needed -->
+    <!-- <property name="hbm2ddl.auto">update</property> -->
+  </session-factory>
+</hibernate-configuration>

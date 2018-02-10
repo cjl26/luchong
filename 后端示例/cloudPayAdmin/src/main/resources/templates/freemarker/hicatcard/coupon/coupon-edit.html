@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!-- Tell the browser to be responsive to screen width -->
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+<#include "../../common/header.html">
+
+<script src="${resurcePath}/cloudpay/js/uploadPreview/uploadPreview.min.js"></script>
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+	<div class="wrapper">
+
+		<!-- 	顶部和左侧菜单的jsp s -->
+		<#include "../../common/menu.html">
+		<!-- 	顶部和左侧菜单的jsp e -->
+
+		<!-- Content Wrapper. Contains page content -->
+		<div class="content-wrapper">
+			<!-- Content Header (Page header) -->
+			<section class="content-header">
+				<h1>编辑优惠券</h1>
+			</section>
+
+			<!-- Main content -->
+			<section class="content" style="padding-bottom: 0px;" id="content">
+				<!-- general form elements -->
+				<div class="box box-primary" style="width: 1000px; margin: 0 auto;">
+					<div class="box-header with-border">
+						<h3 class="box-title">优惠券信息</h3>
+					</div>
+					<!-- /.box-header -->
+					<!-- form start -->
+					<form action="/hicatcard/coupon/editCoupon" method="post" id="roleForm"  enctype="multipart/form-data">					   	    
+							<div class="box-body">
+							<div class="form-group">
+								<label for="couponId">优惠券标识</label>
+								<input type="text" class="form-control" id="couponId" name="couponId" value="${Request.coupon.couponId!}"  readonly="readonly" /> 
+							</div>
+							<div class="form-group">
+								<label for="couponName">优惠券名称</label>
+								<input type="text" class="form-control" id="couponName" name="couponName" value='${Request.coupon.couponName!}'/>
+							</div>
+							<div class="form-group">
+								<label for="phone">优惠价格(单位:元)</label>
+								<#if Request.coupon.fee??>
+								<input type="text" class="form-control" id="fee" name="fee" value='${Request.coupon.fee?c!}'/>
+							    <#else>
+							    <input type="text" class="form-control" id="fee" name="fee" value='${Request.coupon.fee!}'/>
+							    </#if>
+							</div>
+							<div class="form-group">
+								<label for="detail">优惠券介绍</label>
+								<input type="text" class="form-control" id="detail" name="detail" value='${Request.coupon.detail!}'/>								
+							</div>
+							<div class="form-group">
+								<label>有效时间:</label>
+								<div class="input-group">
+								<div class="input-group-addon">
+									<i class="fa fa-calendar"></i>
+								</div>
+									<input type="text" class="form-control pull-right daterange" id="startAndEndDate" name="startAndEndDate" />
+								</div>
+							</div>			
+
+							<div class="form-group">
+								<label for="couponPic">优惠券图片</label>
+								<img <#if Request.coupon.pictureUrl??>src="${Request.coupon.pictureUrl!}"</#if> id="img_couponPic" style="width:160px;height:100px;"/> 
+								<input type="file" class="form-control" id="couponPic" name="couponPic" style="display:none;" />
+							</div>
+							
+							<div class="form-group">
+								<label for="type">对应卡片标识</label> 
+								<select class="form-control select2" style="width: 100%;" name="cardId" id="cardId">
+									<option value="">全部卡片</option>
+									<#list cardList as card>										
+ 										<option value="${card.cardId}" <#if (card.cardId?? && coupon.cardId??)&&(card.cardId == coupon.cardId )>selected="selected"</#if>>${card.cardId!}</option> 									
+ 									</#list>
+								</select>
+							</div>							
+						</div>
+						<div class="box-footer">
+							<button type="submit" class="btn btn-primary">提交</button>
+							<button type="reset" class="btn btn-primary" >清空</button>
+						</div>
+					</form>
+				</div>
+				<!-- /.box -->
+			</section>
+			<!-- /.content -->
+		</div>
+
+	</div>
+	<!-- ./wrapper -->
+</body>
+<script>
+$(function() {
+	//校验器
+	var formValidator = $("#roleForm").validate({
+				onkeyup : false,
+				focusInvalid : false,  //错误时,错误选项不会得到焦点
+				focusCleanup : true,   //得到焦点时，清空错误提示信息
+				rules : {						
+					couponName : {
+						required:true
+					},
+					fee : {
+						required:true,
+						number:true
+					}
+				},
+				messages : {		
+					couponName : {
+						required:"请输入优惠券名称"
+					},
+					fee : {
+						required:"请输入价格",
+						number:"请输入正确的价格"
+					}
+				}
+			});
+	
+	new uploadPreview({
+		UpBtn : "couponPic",
+		ImgShow : "img_couponPic"
+	});
+
+	$("#img_couponPic").click(function() {
+		$("#couponPic").click();
+	});
+	
+	transferFenToYuan("fee");
+	doDaterangepicker("startAndEndDate",dateTime2Date("${Request.coupon.startTime!}"),dateTime2Date("${Request.coupon.endTime!}"))
+});
+
+</script>
+</html>

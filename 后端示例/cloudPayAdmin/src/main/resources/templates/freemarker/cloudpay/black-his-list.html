@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!-- Tell the browser to be responsive to screen width -->
+<meta
+	content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+	name="viewport">
+
+<#include "../common/header.html">
+
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+	<div class="wrapper">
+		<!-- 	顶部和左侧菜单的jsp s -->
+		<#include "../common/menu.html">
+		<!-- 	顶部和左侧菜单的jsp e -->
+
+		<!-- Content Wrapper. Contains page content -->
+		<div class="content-wrapper">
+			<!-- Content Header (Page header) -->
+			<section class="content-header">
+				<h1>黑名单管理</h1>
+			</section>
+
+			<section class="content-header condition clearfix ">
+				<form action="#" id="fromCondition">
+					<div class="form-group">
+						<label>用户标识:</label> <input type="text" class="form-control"
+							name="search_EQ_LONG_userId">
+					</div>
+					<div class="form-group">
+						<label>卡号:</label> <input type="text" class="form-control"
+							name="search_LK_STRING_cardNum">
+					</div>
+
+					<div class="form-group">
+						<label>操作类型:</label> <select class="form-control select2"
+							style="width: 100%;" name="search_EQ_INTEGER_opType">
+							<option selected="selected" value="">全部</option> 
+							<#list opTypeMap?keys as key>
+								<option value="${key}">${opTypeMap[key]!}</option> 
+							</#list>
+						</select>
+					</div>
+					
+					<div class="form-group">
+						<label>来源:</label> <select class="form-control select2"
+							style="width: 100%;" name="search_EQ_INTEGER_source">
+							<option selected="selected" value="">全部</option> 
+							<#list sourceMap?keys as key>
+								<option value="${key}">${sourceMap[key]!}</option> 
+							</#list>
+						</select>
+					</div>
+					
+					<div class="form-group">
+						<label>同步:</label> <select class="form-control select2"
+							style="width: 100%;" name="search_EQ_INTEGER_sync">
+							<option selected="selected" value="">全部</option> 
+							<#list syncMap?keys as key>
+								<option value="${key}">${syncMap[key]!}</option> 
+							</#list>
+						</select>
+					</div>
+					
+ 					<!-- Date range -->
+					<div class="form-group">
+						<label>创建时间:</label>
+
+						<div class="input-group">
+							<div class="input-group-addon">
+								<i class="fa fa-calendar"></i>
+							</div>
+							<input type="text" class="form-control pull-right daterange"
+								name="search_DATERANGE_STRING_createTime" />
+						</div>
+						<!-- /.input group -->
+					</div>
+					<!-- /.form group -->
+					<div class="form-group"
+						style="margin-top: 28px; margin-left: 15px;">
+						<input type="button" value="查询" id="submit" @click="submitForm" />&nbsp&nbsp
+						<input type="reset" value="清空" id="reset" />
+					</div>
+				</form>
+			</section>
+
+			<!-- Main content -->
+			<section class="content">
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="box">
+							<!-- /.box-header -->
+							<div class="box-body">
+								<table id="dataTable" class="table table-bordered table-striped"style="min-width: 1623px">
+									<thead>
+										<tr>
+											<th>选择</th>
+											<th>用户标识</th>
+											<th>卡号</th>
+											<!-- <th>应用标识</th> -->
+											<th>操作类型</th>
+											<th>创建时间</th>
+											<th>来源</th>
+											<th>同步</th>
+											<!-- <th>发送同步</th> -->
+										</tr>
+									</thead>
+								</table>
+							</div>
+							<!-- /.box-body -->
+						</div>
+						<!-- /.box -->
+					</div>
+					<!-- /.col -->
+				</div>
+				<!-- /.row -->
+			</section>
+			<!-- /.content -->
+			
+			 <#include "../common/errorMsg.html">
+		</div>
+
+	</div>
+	<!-- ./wrapper -->
+</body>
+<script>
+  //存放选中行的id的数组
+  var selected = [];
+  
+  //adminlte表格的对象
+  var datatable = null;
+  var formValidator = null;
+  
+  $(function () {
+		    
+	   var vm = new Vue({
+	 		 el: '#fromCondition',
+		    methods: {
+		    	submitForm: function () {
+				  	datatable.draw();
+				  	//每次重画后,清空选中的记录
+		    		selected.splice(0,selected.length)
+		    	}
+      	  }
+  	  })
+       
+      datatable = $('#dataTable').DataTable({
+           'paging'      : true,
+           'lengthChange': true,
+           'searching'   : false,
+           'ordering'    : true,
+           'info'        : true,
+           'autoWidth'   : true,
+           "scrollX"	 : true,
+           "scrollY"	 : true ,  
+           "processing"	 : true,
+           "serverSide"	 : true,
+           "pagingType": "full_numbers",
+           "language": {
+               "lengthMenu":   "显示 _MENU_ 条记录",
+               "zeroRecords":  "没有符合条件的记录",
+               "info":         "第 _PAGE_ 页,共 _PAGES_ 页",
+               "infoEmpty":    "没有符合条件的记录",
+               "paginate": {
+            	   "first":     "第一页",
+            	   "next":      "下一页",
+            	   "previous":  "上一页",
+            	   "last":      "最后一页"
+                }           	  
+           },
+           "drawCallback": function( settings ) {
+        	   //每次重画后,清空选中的记录
+	    		selected.splice(0,selected.length);
+           },
+           "ajax": {
+               "url": "/cloudpay/blackHis/listData",
+               "type": "POST",
+               "data": function ( d ) {
+            	  var formData = $("#fromCondition").serializeJson();
+            	  for(var obj in formData)  {
+            		  d[obj+""] = formData[obj];
+            	  }
+              }
+           },
+           "columns": [ 
+               { "data": "id", "orderable": false,"render":function(data, type, full, meta) {
+                     return  '<input type="checkbox" value="' + data + '">';
+               }},
+               { "data": "userId" },
+               { "data": "cardNum" },
+              /*  { "data": "appId" }, */
+               { "data": "opType" ,
+	            	 "render": function ( data, type, full, meta ) {   
+	            	   <#list opTypeMap?keys as key>
+	            	   	  if(data == '${key}') {
+	            	   		  return '${opTypeMap[key]!}';
+	            	   	  }	
+	       	  		  </#list>
+               		}
+               },
+               { "data": "createTime"},              
+               { "data": "source",
+            	   "render": function ( data, type, full, meta ) {     
+                	   <#list sourceMap?keys as key>
+                	   	  if(data == '${key}') {
+                	   		  return '${sourceMap[key]!}';
+                	   	  }	
+           	  		  </#list>
+            	  }
+               },
+               { "data": "sync",
+            		"render": function ( data, type, full, meta ) {    
+            		   //是否已经同步的状态
+            		   var sync = full.sync;
+            		   //如果未同步
+            		   if(sync == 0) {
+            			   return '<a href="/cloudpay/blackHis/sendSync?blackHisId=' + full.id + '">发送同步</a>' 
+            		   } else {
+            			  <#list syncMap?keys as key>
+                    	   	  if(data == '${key}') {
+                    	   		  return '${syncMap[key]!}';
+                    	   	  }	
+               	  		  </#list>
+            		   }                 	 
+               	   }
+               }/* ,
+               { "data": "id",
+           		"render": function ( data, type, full, meta ) {
+           			   //是否已经同步的状态
+           			   var sync = full.sync;
+           			   //如果未同步
+           			   if(sync == 0) {
+           				  return '<a href="/cloudpay/blackHis/sendSync?blackHisId=' + data + '">发送同步</a>' 
+           			   } else {
+           				   return "";
+           			   }
+              	 }}, */
+			]
+           
+         })
+         
+        
+   
+} );
+         
+  
+ 
+ 
+</script>
+<script src="${resurcePath}/cloudpay/js/common/dataTable.js"></script>
+</html>

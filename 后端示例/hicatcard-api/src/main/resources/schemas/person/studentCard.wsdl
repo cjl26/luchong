@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:sch="http://www.gzyct.com/studentcard/definitions" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.gzyct.com/studentcard/definitions" targetNamespace="http://www.gzyct.com/studentcard/definitions">
+  <wsdl:types>
+    <xs:schema xmlns:studentcard="http://www.gzyct.com/studentcard/definitions" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.gzyct.com/studentcard/definitions">
+	<xs:element name="ApplyNewCardRequest">
+		<xs:complexType>
+			<xs:all>
+				<!-- 姓名 不包含空格-->
+				<xs:element name="name" type="xs:token"/>
+				<!-- 性别 -->
+				<xs:element name="gender" type="studentcard:genderType"/>
+				<!-- 申办证件号 -->
+				<xs:element name="sno" type="xs:token"/>
+				<!-- 学校所属区域 -->
+				<xs:element name="schoolArea" type="xs:token"/>
+				<!-- 学校名称 -->
+				<xs:element name="schoolName" type="xs:token"/>
+				<!-- 学校类型 -->
+				<xs:element name="schoolType" type="studentcard:schoolType"/>
+				<!-- 在读年级 -->
+				<xs:element name="grade" type="studentcard:gradeType"/>
+				<!-- 毕业年份 -->
+				<xs:element name="gradDate" type="xs:gYear"/>
+				<!-- 联系电话 -->
+				<xs:element name="contactPhone" type="xs:token"/>
+				<!-- 手机 -->
+				<xs:element name="mobile" type="studentcard:mobileType"/>
+				<!-- 邮储收款流水号 -->
+				<xs:element name="seqNo" type="studentcard:seqNoType"/>
+				<!-- 制卡照片 -->
+				<xs:element name="photo" type="studentcard:image"/>
+				<!-- 取卡方式 -->
+				<xs:element name="fetchCard" type="studentcard:fetchCardType"/>
+				<!-- 取卡人 -->
+				<xs:element name="receiverName" type="xs:token"/>
+				<!-- 取卡人联系电话 -->
+				<xs:element name="receiverTel" type="xs:normalizedString"/>
+				<!-- 取卡人证件号 -->
+				<xs:element maxOccurs="1" minOccurs="0" name="receiverIdNo" type="xs:token"/>
+				<!-- 取卡人联系地址 -->
+				<xs:element name="receiverAddress" type="xs:string"/>
+				<!-- 取卡人邮编  -->
+				<xs:element maxOccurs="1" minOccurs="0" name="receiverZip" type="xs:token"/>
+			</xs:all>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="ApplyNewCardResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="result" type="studentcard:resultType"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+
+	<xs:simpleType name="genderType">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="0"/>
+			<xs:enumeration value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="snoType">
+		<xs:restriction base="xs:token">
+			<xs:pattern value="[0-9|a-z|A-Z]{10,21}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="schoolCodeType">
+		<xs:restriction base="xs:token">
+			<xs:pattern value="[0-9]{1,30}"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="schoolType">
+		<xs:restriction base="xs:token">
+			<!-- 市教育局属普通小学-->
+			<xs:enumeration value="1"/>
+			<!-- 市教育局属普通初中-->
+			<xs:enumeration value="2"/>
+			<!--  市教育局属职业中学-->
+			<xs:enumeration value="3"/>
+			<!-- 市劳保局属技术学校 -->
+			<xs:enumeration value="4"/>
+			<!-- 省教育厅职业中学 -->
+			<xs:enumeration value="5"/>
+			<!-- 市教育局属普通高中-->
+			<xs:enumeration value="6"/>
+			<!-- 省属技工学校-->
+			<xs:enumeration value="7"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="gradeType">
+		<xs:restriction base="xs:token">
+			<!-- 一年级 -->
+			<xs:enumeration value="1"/>
+			<!-- 二年级 -->
+			<xs:enumeration value="2"/>
+			<!-- 三年级 -->
+			<xs:enumeration value="3"/>
+			<!-- 四年级 -->
+			<xs:enumeration value="4"/>
+			<!-- 五年级 -->
+			<xs:enumeration value="5"/>
+			<!-- 六年级 -->
+			<xs:enumeration value="6"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="mobileType">
+		<xs:restriction base="xs:token">
+			<xs:pattern value="(13[0-9]|15[0|3|6|7|8|9]|18[8|9])\d{8}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="seqNoType">
+		<xs:restriction base="xs:token">
+			<xs:pattern value="[0-9]{0,30}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="image">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string"/>
+            <xs:element name="image" type="xs:base64Binary" xmime:expectedContentTypes="image/jpeg"/>
+        </xs:sequence>
+    </xs:complexType>
+    	<xs:simpleType name="fetchCardType">
+		<xs:restriction base="xs:token">
+			<!-- 自取 -->
+			<xs:enumeration value="0"/>
+			<!-- 快递 -->
+			<xs:enumeration value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="resultCode">
+		<xs:restriction base="xs:token">
+			<!-- 成功 -->
+			<xs:enumeration value="00"/>
+			<!-- 失败 -->
+			<xs:enumeration value="01"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="errorCode">
+		<xs:restriction base="xs:token">
+			<!-- 必填项为空值 -->
+			<xs:enumeration value="10"/>
+			<!-- 信息不全 -->
+			<xs:enumeration value="11"/>
+			<!-- 申办证件号格式错误 -->
+			<xs:enumeration value="12"/>
+			<!-- 照片类型错误 -->
+			<xs:enumeration value="13"/>
+			<!-- 照片DPI过低 -->
+			<xs:enumeration value="14"/>
+			<!-- 收款流水号无效 -->
+			<xs:enumeration value="15"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="resultType">
+		<xs:all>
+			<xs:element name="resultCode" type="studentcard:resultCode"/>
+			<xs:element minOccurs="0" name="reSeq" type="xs:token"/>
+			<xs:element minOccurs="0" name="reSeqImage" type="studentcard:image"/>
+			<xs:element minOccurs="0" name="errorCode" type="studentcard:errorCode"/>
+		</xs:all>
+	</xs:complexType>
+</xs:schema>
+  </wsdl:types>
+  <wsdl:message name="ApplyNewCardRequest">
+    <wsdl:part element="tns:ApplyNewCardRequest" name="ApplyNewCardRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="ApplyNewCardResponse">
+    <wsdl:part element="tns:ApplyNewCardResponse" name="ApplyNewCardResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="StudentCard">
+    <wsdl:operation name="ApplyNewCard">
+      <wsdl:input message="tns:ApplyNewCardRequest" name="ApplyNewCardRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:ApplyNewCardResponse" name="ApplyNewCardResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="StudentCardSoap11" type="tns:StudentCard">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="ApplyNewCard">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="ApplyNewCardRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="ApplyNewCardResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="StudentCardService">
+    <wsdl:port binding="tns:StudentCardSoap11" name="StudentCardSoap11">
+      <soap:address location="http://www.gzyct.com/card-student-ws/studentCardService"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

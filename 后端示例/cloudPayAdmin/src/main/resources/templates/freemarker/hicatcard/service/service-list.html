@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!-- Tell the browser to be responsive to screen width -->
+<meta
+	content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+	name="viewport">
+
+<#include "../../common/header.html">
+
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+	<div class="wrapper">
+		<!-- 	顶部和左侧菜单的jsp s -->
+		<#include "../../common/menu.html">
+		<!-- 	顶部和左侧菜单的jsp e -->
+
+		<!-- Content Wrapper. Contains page content -->
+		<div class="content-wrapper">
+			<!-- Content Header (Page header) -->
+			<section class="content-header">
+				<h1>服务列表</h1>
+			</section>
+
+			<section class="content-header condition clearfix ">
+				<form action="#" id="fromCondition">
+<!-- 					<div class="form-group">
+						<label>服务标识:</label> 
+						<input type="text" class="form-control" name="search_EQ_LONG_id">
+					</div> -->
+					<div class="form-group">
+						<label>服务名称:</label> 
+						<input type="text" class="form-control" name="search_LK_STRING_serviceName">
+					</div>
+				<!-- 	<div class="form-group">
+         				<label>状态:</label>
+        			    <select class="form-control select2" style="width: 100%;" name="search_EQ_STRING_status">
+           	  			<option selected="selected" value="">全部</option>
+           	  				<#list statusMap?keys as key>  
+               					<option value="${key}">${statusMap[key]!}</option>
+        	  				</#list>  
+          				</select>
+    				</div>  -->
+					<!-- /.form group -->
+					<div class="form-group"
+						style="margin-top: 28px; margin-left: 15px;">
+						<input type="submit" value="查询" id="submit"  />&nbsp&nbsp
+						<input type="reset" value="清空" id="reset" />
+					</div>
+				</form>
+			</section>
+
+			<!-- Main content -->
+			<section class="content" style="padding-bottom: 0px;">
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="box">
+							<!-- /.box-header -->
+							<div class="box-body">
+								<table id="dataTable" class="table table-bordered table-striped"style="min-width: 1623px">
+									<thead>
+										<tr>
+											<th>选择</th>
+											<th>服务名</th>
+											<!-- <th>状态</th> -->
+											<th>创建时间</th>
+											<th>操作</th>									
+										</tr>
+									</thead>
+								</table>
+							</div>
+							<!-- /.box-body -->
+						</div>
+						<!-- /.box -->
+					</div>
+					<!-- /.col -->
+				</div>
+				<!-- /.row -->
+			</section>
+			<!-- /.content -->
+
+
+			<section class="content-header condition clearfix " style="padding: 0px 14px">
+				<button onclick="window.location.href='/hicatcard/service/toServiceEditPage';"
+					class="btn btn-default" style="margin-right: 10px">新增服务</button>
+				<!-- <button onclick="effectiveStatus();" class="btn btn-default"
+					style="margin-right: 10px">启用状态</button>
+				<button onclick="unEffectiveStatus();" class="btn btn-default"
+					style="margin-right: 10px">停用状态</button> -->
+			</section>
+			
+			 <#include "../../common/errorMsg.html">
+		</div>
+
+	</div>
+	<!-- ./wrapper -->
+</body>
+<script>
+ /*  存放选中行的id的数组 */
+  var selected = [];
+  
+  //adminlte表格的对象
+  var datatable = null;
+  var formValidator = null;
+  
+  $(function () {
+		    
+	   var vm = new Vue({
+	 		 el: '#fromCondition',
+		    methods: {
+		    	submitForm: function () {
+				  	datatable.draw();
+		    	}
+      	  }
+  	  })
+	   
+	  //校验器
+	  formValidator = $("#fromCondition").validate({
+			onkeyup : false,
+			focusInvalid : false,  //错误时,错误选项不会得到焦点
+			focusCleanup : true,   //得到焦点时，清空错误提示信息
+			submitHandler : function() { //表单提交句柄,为一回调函数，带一个参数：form
+				vm.submitForm();
+			},
+			rules : {},
+			messages : {}
+	  });
+	          
+      datatable = $('#dataTable').DataTable({
+           'paging'      : true,
+           'lengthChange': true,
+           'searching'   : false,
+           'ordering'    : true,
+           'info'        : true,
+           'autoWidth'   : true,
+           "scrollX"	 : true,
+           "scrollY"	 : true ,  
+           "processing"	 : true,
+           "serverSide"	 : true,
+           "pagingType": "full_numbers",
+           "language": {
+               "lengthMenu":   "显示 _MENU_ 条记录",
+               "zeroRecords":  "没有符合条件的记录",
+               "info":         "第 _PAGE_ 页,共 _PAGES_ 页",
+               "infoEmpty":    "没有符合条件的记录",
+               "paginate": {
+            	   "first":     "第一页",
+            	   "next":      "下一页",
+            	   "previous":  "上一页",
+            	   "last":      "最后一页"
+                }           	  
+           },
+           //如果查询条件有校验，需要加这个
+           "preDrawCallback": function( settings ) {
+        	   if(!isEmpty(formValidator)) {
+        		   if(!formValidator.valid()) {
+            		   return false;
+            	   }
+        	   }        	
+        	},
+           "drawCallback": function( settings ) {
+        	   //每次重画后,清空选中的记录
+	    		selected.splice(0, selected.length);
+           },
+           "ajax": {
+               "url": "/hicatcard/service/getServiceListData",
+               "type": "POST",
+               "data": function ( d ) {
+            	  var formData = $("#fromCondition").serializeJson();
+            	  for(var obj in formData)  {
+            		  d[obj+""] = formData[obj];
+            	  }
+              }
+           },
+           "columns": [     
+                { "data": "serviceId", "orderable": false,"render":function(data, type, full, meta) {
+    	            	   return  '<input type="checkbox" value="' + data + '">';
+    	        }},        
+
+               { "data": "serviceName" },
+              /*  { "data": "status",
+	            	"render": function ( data, type, full, meta ) {     
+		           		<#list statusMap?keys as key>
+		         			if(data == '${key}') {
+		         				return '${statusMap[key]!}';
+		   					}
+						</#list>
+	  			}}, */
+               { "data": "createTime"},
+               { "data": "serviceId",
+            	   "render": function ( data, type, full, meta ) {   
+            		   return '<button onclick="editService(' + data + ');" class="btn btn-default" style="margin-right: 10px">编辑信息</button>'
+            		   		+ '<button onclick="deleteService(' + data + ');" class="btn btn-default" style="margin-right: 10px">删除</button>';            		   
+	  			}}	  		 
+			]
+         })
+});
+
+//onclick="window.location.href=/admin/toUserRolePage?userId=' + data + ';"
+//onclick="window.location.href=/menu/edit?menuId=' + data + ';"
+//<a type="button" value="编辑" onclick="editInfo(' + data + ')"/>'+'
+
+function deleteService(serviceId){
+	var r = confirm("是否删除服务");
+	if (r == false){
+	    return;
+	}
+	
+	//发送ajax
+    $.ajax({
+        url: '/hicatcard/service/deleteService',    
+        type: 'POST',
+        data: { serviceId: serviceId},
+        dataType:"json",
+        success: function (result) {  
+            if(result.result_code == successRespCode){
+           	 	alert("刪除服务成功");
+           	 	window.location.reload();
+          	} else {
+          		alert(result.error_message);
+          	} 
+        }, 
+        error:function (XMLHttpRequest, textStatus, errorThrown) {
+           alert("网络繁忙，请稍后再试");
+        },
+   });
+}
+
+
+//编辑信息
+function editService(serviceId){
+	
+	window.location.href="/hicatcard/service/toServiceEditPage?serviceId=" + serviceId;
+	
+}
+
+
+</script>
+<script src="${resurcePath}/cloudpay/js/common/dataTable.js"></script>
+</html>
+

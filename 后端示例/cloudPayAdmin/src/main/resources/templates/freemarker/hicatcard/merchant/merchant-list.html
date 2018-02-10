@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!-- Tell the browser to be responsive to screen width -->
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+<#include "../../common/header.html">
+
+<style type="text/css">
+			.transaction-dialog {
+				position: absolute;
+				width: 600px;
+				border: 1px solid;
+				top: 50%;
+				left: 50%;
+				-webkit-transform: translate(-50%, -50%);
+				-moz-transform: translate(-50%, -50%);
+				-ms-transform: translate(-50%, -50%);
+				-o-transform: translate(-50%, -50%);
+				transform: translate(-50%, -50%);
+				background-color:white;
+				display: none;
+				
+			}
+			
+			.transaction-title {
+				border-bottom: 1px solid;
+				font-size: 18px;
+				font-weight: bold;
+				text-align: center;
+			}
+			
+			.transaction-date {
+				font-weight: bold;
+				margin-top: 15px;
+				margin-bottom: 15px;
+				padding-left: 15px;
+				padding-right: 15px;
+			}
+			
+			.transaction-table {
+				margin-bottom: 20px;
+			}
+			
+			.transaction-button {
+				text-align: center;
+				margin-bottom: 20px;
+			}
+			
+			.transaction-total{
+				margin-bottom: 15px;
+				text-align: right;
+				padding-right: 30px;
+				font-weight: bold;
+			}
+			
+			.transaction-total > font {
+				color: red;	
+				font-size: 25px;
+			}
+			
+			table,
+			table tr th,
+			table tr td {
+				border: 1px solid;
+			}
+			
+			table {
+				width: 400px;
+				min-height: 25px;
+				line-height: 25px;
+				text-align: center;
+				border-collapse: collapse;
+				padding: 2px;
+				margin: 0 auto;
+			}
+		</style>
+
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+	<div class="wrapper">
+		<!-- 	顶部和左侧菜单的jsp s -->
+		<#include "../../common/menu.html">
+		<!-- 	顶部和左侧菜单的jsp e -->
+
+		<!-- Content Wrapper. Contains page content -->
+		<div class="content-wrapper">
+			<!-- Content Header (Page header) -->
+			<section class="content-header">
+				<h1>商户列表</h1>
+			</section>
+
+			<section class="content-header condition clearfix ">
+				<form action="#" id="fromCondition">
+<!-- 					<div class="form-group">
+						<label>服务标识:</label> 
+						<input type="text" class="form-control" name="search_EQ_LONG_id">
+					</div> -->
+					<div class="form-group">
+						<label>商户名称:</label> 
+						<input type="text" class="form-control" name="search_LK_STRING_name">
+					</div>
+					<div class="form-group">
+						<label>商户编号:</label> 
+						<input type="text" class="form-control" name="search_LK_STRING_merchantNumber">
+					</div>
+					<div class="form-group">
+						<label>联系电话:</label> 
+						<input type="text" class="form-control" name="search_LK_STRING_phone">
+					</div>
+					<div class="form-group">
+						<label>省份:</label> 
+						<input type="text" class="form-control" name="search_LK_STRING_province">
+					</div>
+					<div class="form-group">
+						<label>城市:</label> 
+						<input type="text" class="form-control" name="search_LK_STRING_city">
+					</div>
+				    <div class="form-group">
+         				<label>状态:</label>
+        			    <select class="form-control select2" style="width: 100%;" name="search_EQ_STRING_status">
+           	  			<option selected="selected" value="">全部</option>
+           	  				<#list statusMap?keys as key>  
+               					<option value="${key}">${statusMap[key]!}</option>
+        	  				</#list>  
+          				</select>
+    				</div> 
+					<!-- /.form group -->
+					<div class="form-group"
+						style="margin-top: 28px; margin-left: 15px;">
+						<input type="submit" value="查询" id="submit"/>&nbsp&nbsp
+						<input type="reset" value="清空" id="reset" />
+					</div>
+				</form>
+			</section>
+
+			<!-- Main content -->
+			<section class="content" style="padding-bottom: 0px;">
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="box">
+							<!-- /.box-header -->
+							<div class="box-body">
+								<table id="dataTable" class="table table-bordered table-striped" style="width: 2300px;" >
+									<thead>
+										<tr>
+											<th>选择</th>
+											<th>商户编号</th>
+											<th>商户名称</th>
+										    <th>状态</th> 
+											<th>联系电话</th>
+											<th>省份</th>
+											<th>城市</th>
+											<th>地址</th>
+											<th>商户介绍</th>
+											<th>创建者</th>
+											<th>创建时间</th>
+											<!-- <th>商家图片地址</th> -->
+											<th>商家主页地址</th>
+											<th>操作</th>									
+										</tr>
+									</thead>
+								</table>
+							</div>
+							<!-- /.box-body -->
+						</div>
+						<!-- /.box -->
+					</div>
+					<!-- /.col -->
+				</div>
+				<!-- /.row -->
+			</section>
+			<!-- /.content -->
+
+
+			<section class="content-header condition clearfix " style="padding: 0px 14px">
+				<button onclick="window.location.href='/hicatcard/merchant/toMerchantEditPage';" class="btn btn-default" style="margin-right: 10px">新增商户</button>
+			</section>
+			
+			 <#include "../../common/errorMsg.html">
+		</div>
+
+	</div>
+	<!-- ./wrapper -->
+	
+	<!-- 结算弹出层 start=== -->
+	<div class="transaction-dialog" id="transaction-dialog">
+			<div class="transaction-title">
+				结算
+			</div>
+			<div class="transaction-date" id="transaction-date">
+				2017/12/12 00:00 ~ 2017/12/12 00:00
+			</div>
+			<div class="transaction-table" id="transaction-table">
+				<table>
+					<tr>
+						<td>服务项目</td>
+						<td>元/次</td>
+						<td>核销次数</td>
+						<td>合计</td>						
+					</tr>
+					<tr>
+						<td>洗车</td>
+						<td>50</td>
+						<td>10</td>						
+						<td>5000</td>
+					</tr>
+					<tr>
+						<td>洗车</td>
+						<td>50</td>
+						<td>10</td>						
+						<td>5000</td>
+					</tr>
+					<tr>
+						<td>洗车</td>
+						<td>50</td>
+						<td>10</td>						
+						<td>5000</td>
+					</tr>
+				</table>
+			</div>
+			<div class="transaction-total">
+				待结算金额：<font id="totalFee">6160元</font>
+			</div>
+			<div class="transaction-button">
+				<button style="margin-right: 15px;" onclick="dealSettlement();">结算</button>
+				<button style="margin-left: 15px;" onclick="$('#transaction-dialog').hide();">关闭</button>
+			</div>
+		</div>
+		<!-- 结算弹出层 end=== -->
+</body>
+<script>
+ /*  存放选中行的id的数组 */
+  var selected = [];
+  
+  //adminlte表格的对象
+  var datatable = null;
+  var formValidator = null;
+  
+  $(function () {
+		    
+	   var vm = new Vue({
+	 		 el: '#fromCondition',
+		    methods: {
+		    	submitForm: function () {
+				  	datatable.draw();
+				  	//每次重画后,清空选中的记录
+		    		selected.splice(0,selected.length)
+		    	}
+      	  }
+  	  })
+	   
+	   //校验器
+		  formValidator = $("#fromCondition").validate({
+				onkeyup : false,
+				focusInvalid : false,  //错误时,错误选项不会得到焦点
+				focusCleanup : true,   //得到焦点时，清空错误提示信息
+				submitHandler : function() { //表单提交句柄,为一回调函数，带一个参数：form
+					vm.submitForm();
+				},
+				rules : {},
+				messages : {}
+		  });
+	          
+      datatable = $('#dataTable').DataTable({
+           'paging'      : true,
+           'lengthChange': true,
+           'searching'   : false,
+           'ordering'    : true,
+           'info'        : true,
+           'autoWidth'   : false,
+           "scrollX"	 : true,
+           "scrollY"	 : true,  
+           "processing"	 : true,
+           "serverSide"	 : true,
+           "order": [[ 0, 'desc' ]],
+           "pagingType": "full_numbers",
+           "language": {
+               "lengthMenu":   "显示 _MENU_ 条记录",
+               "zeroRecords":  "没有符合条件的记录",
+               "info":         "第 _PAGE_ 页,共 _PAGES_ 页",
+               "infoEmpty":    "没有符合条件的记录",
+               "paginate": {
+            	   "first":     "第一页",
+            	   "next":      "下一页",
+            	   "previous":  "上一页",
+            	   "last":      "最后一页"
+                }           	  
+           },
+           //如果查询条件有校验，需要加这个
+           "preDrawCallback": function( settings ) {
+        	   if(!isEmpty(formValidator)) {
+        		   if(!formValidator.valid()) {
+            		   return false;
+            	   }
+        	   }        	
+        	},
+           "drawCallback": function( settings ) {
+        	   //每次重画后,清空选中的记录
+	    		selected.splice(0, selected.length);
+           },
+           "ajax": {
+               "url": "/hicatcard/merchant/getMerchantListData",
+               "type": "POST",
+               "data": function ( d ) {
+            	  var formData = $("#fromCondition").serializeJson();
+            	  for(var obj in formData)  {
+            		  d[obj+""] = formData[obj];
+            	  }
+              }
+           },
+           "columns": [     
+               { "data": "merchantId","orderable": false,"render":function(data, type, full, meta) {
+    	            	   return  '<input type="checkbox" value="' + data + '">';
+    	       }},        
+               { "data": "merchantNumber" },
+               { "data": "name" },
+               { "data": "status",
+	            	"render": function ( data, type, full, meta ) {     
+		           		<#list statusMap?keys as key>
+		         			if(data == '${key}') {
+		         				return '${statusMap[key]!}';
+		   					}
+						</#list>
+	  		   }},
+               { "data": "phone" },
+               { "data": "province" },
+               { "data": "city" },
+               { "data": "address" },
+               { "data": "detail" },
+               { "data": "creator" },
+               { "data": "createTime"},
+              /*  { "data": "pictureUrl" }, */
+               { "data": "webUrl" },            
+               { "data": "merchantId",
+            	   "render": function ( data, type, full, meta ) {   
+            		   return '<button onclick="settlement(' + data + ');" class="btn btn-default" style="margin-right: 10px">结算</button>'
+       		   				+ '<button onclick="toMerchantSettleListPage(' + data + ');" class="btn btn-default" style="margin-right: 10px">结算记录</button>' 
+            		   		+'<button onclick="editMerchant(' + data + ');" class="btn btn-default" style="margin-right: 10px">编辑信息</button>'
+            		   		+ '<button onclick="addService(' + data + ');" class="btn btn-default" style="margin-right: 10px">增加服务项</button>'
+            		   		+ '<button onclick="deleteMerchant(' + data + ');" class="btn btn-default" style="margin-right: 10px">删除</button>';            		   
+	  			}}	  		 
+			]
+         })
+});
+  
+//跳转到 商户结算页面
+function toMerchantSettleListPage(merchantId) {
+	window.location.href="/hicatcard/merchantSettle/toListPage?merchantId=" + merchantId;
+}
+
+//列表里结算按钮触发函数
+function settlement(merchantId) {
+	
+	//发送ajax
+    $.ajax({
+        url: '/hicatcard/merchant/getMerchantSettleData',    
+        type: 'POST',
+        data: { merchantId: merchantId},
+        dataType:"json",
+        success: function (result) {
+        	//提交结算时需要用到的数据
+           settleData = result;
+          
+           $("#transaction-date").html(result.settleStartTime + " ~ " + result.settleEndTime);
+           $("#totalFee").html(result.settleFee + "元")
+           $("#transaction-table").html("");
+           var str = '<table>'
+           			+  '<tr>'
+           			+      '<td>服务项目</td>'
+           			+      '<td>元/次</td>'
+           			+      '<td>核销次数</td>'
+           			+      '<td>合计</td>'
+           			+  '<tr>';
+           	$.each(result.merchantSettleResultList,function(i,n) {
+           		str += '<tr>'  
+           			+      '<td>' + n.serviceName + '</td>'
+           			+      '<td>' + n.transcationFee + '</td>'
+           		    +      '<td>' + n.transactionTime + '</td>'
+           		    +      '<td>' + n.transactionTotal + '</td>'
+           		    +   '<tr>';
+           	});		
+           	str	+= '</table>';
+           	
+            $("#transaction-table").html(str);
+            $('#transaction-dialog').show();
+        }, 
+        error:function (XMLHttpRequest, textStatus, errorThrown) {
+           alert("网络繁忙，请稍后再试");
+        },
+   });
+   
+	
+	
+}
+
+var settleData = null;
+//点击对话框计算触发的函数
+function dealSettlement() {
+	$.ajax({
+        type: "POST",
+        url: "/hicatcard/merchant/dealMerchantSettle",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(settleData),
+        dataType: "json",
+        success: function (result) {
+          if(result.result_code == successRespCode) {
+        	  alert("结算成功!!");
+        	  $('#transaction-dialog').hide();
+          } else {
+        	  alert(result.error_message);
+          }
+        },
+        error:function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("网络繁忙，请稍后再试");
+        },
+    });
+}
+
+function deleteMerchant(merchantId){
+	var r = confirm("是否删除商户");
+	if (r == false) {
+	    return;
+	}
+	
+	//发送ajax
+    $.ajax({
+        url: '/hicatcard/merchant/deleteMerchant',    
+        type: 'POST',
+        data: { merchantId: merchantId},
+        dataType:"json",
+        success: function (result) {  
+            if(result.result_code == successRespCode){
+           	 	alert("刪除商户成功");
+           	 	window.location.reload();
+          	} else {
+          		alert(result.error_message);
+          	} 
+        }, 
+        error:function (XMLHttpRequest, textStatus, errorThrown) {
+           alert("网络繁忙，请稍后再试");
+        },
+   });
+}
+
+
+//编辑信息
+function editMerchant(merchantId){
+	
+	window.location.href="/hicatcard/merchant/toMerchantEditPage?merchantId=" + merchantId;
+	
+}
+
+//为商户添加服务项
+function addService(merchantId) {
+	window.location.href="/hicatcard/merchant/toAddServicePage?merchantId=" + merchantId;
+}
+
+
+</script>
+<script src="${resurcePath}/cloudpay/js/common/dataTable.js"></script>
+</html>
+

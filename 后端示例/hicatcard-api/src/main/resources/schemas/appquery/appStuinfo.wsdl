@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:sch="http://www.gzyct.com/studentcard/definitions/queryappstu" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.gzyct.com/studentcard/definitions/queryappstu" targetNamespace="http://www.gzyct.com/studentcard/definitions/queryappstu">
+  <wsdl:types>
+    <xs:schema xmlns:appstuinfo="http://www.gzyct.com/studentcard/definitions/queryappstu" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.gzyct.com/studentcard/definitions/queryappstu">
+	<xs:element name="QueryAppStuRequest">
+		<xs:complexType>
+			<xs:all>
+				<!-- 审核流程号 -->
+				<xs:element name="seq" type="xs:token"/>
+				<!-- 学生姓名 -->
+				<xs:element name="name" type="xs:token"/>
+			</xs:all>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="QueryAppStuResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="result" type="appstuinfo:resultType"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:simpleType name="resultCode">	
+		<xs:restriction base="xs:token">		
+			<!-- 成功 -->
+			<xs:enumeration value="00"/>
+			<!-- 失败 -->
+			<xs:enumeration value="01"/>
+		</xs:restriction>		
+	</xs:simpleType>
+	
+	<xs:simpleType name="errorCode">	
+		<xs:restriction base="xs:token">	
+			<!-- 必填项为空值-->
+			<xs:enumeration value="10"/>	
+			<!-- 不存在该流水号或学生姓名-->
+			<xs:enumeration value="21"/>		
+			<!-- 该流水号相关状态不存在 -->
+			<xs:enumeration value="22"/>	
+		</xs:restriction>		
+	</xs:simpleType>
+	
+	<xs:complexType name="resultType">
+		<xs:all>
+			<xs:element name="resultCode" type="appstuinfo:resultCode"/>
+			<xs:element minOccurs="0" name="status" type="xs:token"/>
+			<xs:element minOccurs="0" name="errorCode" type="appstuinfo:errorCode"/>
+			<xs:element minOccurs="0" name="clientId" type="xs:token"/>
+			<xs:element minOccurs="0" name="printStatus" type="xs:token"/>
+			<xs:element minOccurs="0" name="fetchType" type="xs:token"/>
+			<!-- mailNo为空则快递单号不存在，mailNo为ABN.则快递单号初始值缺失 -->
+			<xs:element minOccurs="0" name="mailNo" type="xs:token"/>
+			<xs:element minOccurs="0" name="expressStatus" type="xs:token"/>
+			<xs:element minOccurs="0" name="seq" type="xs:token"/>
+			<xs:element name="name" type="xs:token"/>
+			<xs:element name="gender" type="xs:token"/>
+			<xs:element name="sno" type="xs:token"/>
+			<xs:element name="mobile" type="xs:token"/>
+			<xs:element name="schtype" type="xs:token"/>
+			<xs:element name="schdis" type="xs:token"/>
+			<xs:element name="schname" type="xs:token"/>
+			<xs:element name="grade" type="xs:token"/>
+			<xs:element name="graddate" type="xs:token"/>
+			<xs:element name="recname" type="xs:token"/>
+			<xs:element name="rectel" type="xs:token"/>
+			<xs:element name="recaddr" type="xs:token"/>
+			<xs:element name="reczip" type="xs:token"/>
+		</xs:all>
+	</xs:complexType>
+</xs:schema>
+  </wsdl:types>
+  <wsdl:message name="QueryAppStuRequest">
+    <wsdl:part element="tns:QueryAppStuRequest" name="QueryAppStuRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="QueryAppStuResponse">
+    <wsdl:part element="tns:QueryAppStuResponse" name="QueryAppStuResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="appStuinfo">
+    <wsdl:operation name="QueryAppStu">
+      <wsdl:input message="tns:QueryAppStuRequest" name="QueryAppStuRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:QueryAppStuResponse" name="QueryAppStuResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="appStuinfoSoap11" type="tns:appStuinfo">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="QueryAppStu">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="QueryAppStuRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="QueryAppStuResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="appStuinfoService">
+    <wsdl:port binding="tns:appStuinfoSoap11" name="appStuinfoSoap11">
+      <soap:address location="http://www.gzyct.com/app-stuinfo-query/queryAppStuService"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

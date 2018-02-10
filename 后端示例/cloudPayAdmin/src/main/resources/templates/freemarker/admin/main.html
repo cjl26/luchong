@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  	<meta charset="utf-8">
+  	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+  	<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+	<#include "../common/header.html">
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+  <div class="wrapper">	
+  
+  <!-- 	顶部和左侧菜单的jsp s -->
+  <#include "../common/menu.html">
+  <!-- 	顶部和左侧菜单的jsp e -->
+  
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+<!--       <h1>
+        Data Tables
+      </h1> -->
+    </section>
+    
+    <section class="content-header condition clearfix ">
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+
+    </section>
+    <!-- /.content -->
+  </div>
+ 
+</div>
+<!-- ./wrapper -->
+</body>
+<script>
+	
+  $(function () {             
+       var vm = new Vue({
+	 		 el: '#fromCondition',
+	 		 data: {
+	  		  condition: {
+	    			search_EQ_NUMBER_status:"",
+					search_EQ_STRING_cardNum:"",
+					search_EQ_DATERANGE_createTime:""
+	    		}
+			  },
+		    methods: {
+		    	submitForm: function () {
+		    		alert(1);
+		    		datatable.draw();
+		    	}
+        	}
+    })
+       
+       var datatable = $('#dataTable').DataTable({
+           'paging'      : true,
+           'lengthChange': true,
+           'searching'   : false,
+           'ordering'    : true,
+           'info'        : true,
+           'autoWidth'   : false,
+           "scrollX"		: true,
+           "scrollY"		: true ,  
+           "processing"	: true,
+           "serverSide"	: true,
+           "ajax": {
+               "url": "/cloudpay/card/getCardList",
+               "type": "POST",
+               "data": function ( d ) {
+                  /*  d.myKey = "myValue"; */
+                  var condition = vm.condition;
+                  for(var obj in condition) {
+                  	d[obj+""] = condition[obj]
+                  }
+               }
+           },
+           "columns": [
+               { "data": "userId" },
+               { "data": "cardNum" },
+               { "data": "appId" },
+               { "data": "status" },
+               { "data": "createTime" },
+               { "data": "updateTime" },
+               { "data": "available" },
+               { "data": "operator" }
+               
+			]
+           
+         })
+  })
+</script>
+</html>

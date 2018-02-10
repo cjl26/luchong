@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:sch="http://www.gzyct.com/studentcard/definitions/applyonline" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.gzyct.com/studentcard/definitions/applyonline" targetNamespace="http://www.gzyct.com/studentcard/definitions/applyonline">
+  <wsdl:types>
+    <xs:schema xmlns:cardapply="http://www.gzyct.com/studentcard/definitions/applyonline" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.gzyct.com/studentcard/definitions/applyonline">
+	<xs:element name="ApplyOnlineRequest">
+		<xs:complexType>
+			<xs:all>
+				<!-- 审核流程号 -->
+				<xs:element name="seq" type="xs:token"/>
+				<!-- 取卡人 -->
+				<xs:element name="receiverName" type="xs:token"/>
+				<!-- 取卡人联系电话 -->
+				<xs:element name="receiverTel" type="xs:normalizedString"/>
+				<!-- 取卡人证件号 -->
+				<xs:element maxOccurs="1" minOccurs="0" name="receiverIdNo" type="xs:token"/>
+				<!-- 取卡人联系地址 -->
+				<xs:element name="receiverAddress" type="xs:string"/>
+				<!-- 取卡人邮编  -->
+				<xs:element maxOccurs="1" minOccurs="0" name="receiverZip" type="xs:token"/>
+				<!-- 证件照图片服务器ip -->
+				<xs:element name="identityIp" type="xs:token"/>
+				<!-- 证件照图片路径 -->
+				<xs:element name="identityPath" type="xs:token"/>
+				<!-- 申请表图片服务器ip -->
+				<xs:element name="formIp" type="xs:token"/>
+				<!-- 申请表图片路径 -->
+				<xs:element name="formPath" type="xs:token"/>
+				<!-- 支付渠道  -->
+				<xs:element name="channel" type="cardapply:channelType"/>
+				<!-- 是否已经付费  -->
+				<xs:element name="isPaid" type="cardapply:isPaidFlag"/>
+				<!-- 支付流水号  -->
+				<xs:element name="payNumber" type="xs:token"/>
+				<!-- 请求来源  -->
+				<xs:element name="source" type="cardapply:sourceType"/>
+			</xs:all>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="ApplyOnlineResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="result" type="cardapply:resultType"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:complexType name="image">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string"/>
+            <xs:element name="image" type="xs:base64Binary" xmime:expectedContentTypes="image/jpeg"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:simpleType name="channelType">
+		<xs:restriction base="xs:token">
+			<!-- 羊城通宝支付 -->
+			<xs:enumeration value="yctbao"/>
+			<!-- 微信支付 -->
+			<xs:enumeration value="weixin"/>
+			<!-- 支付宝支付 -->
+			<xs:enumeration value="zhifubao"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+    <xs:simpleType name="sourceType">
+		<xs:restriction base="xs:token">
+			<!-- 万户PC客户端 -->
+			<xs:enumeration value="wanhu"/>
+			<!-- 微信客户端 -->
+			<xs:enumeration value="weixin"/>
+			<!-- 手机应用程序 -->
+			<xs:enumeration value="app"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="isPaidFlag">
+		<xs:restriction base="xs:token">
+			<!-- 否 -->
+			<xs:enumeration value="0"/>
+			<!-- 是 -->
+			<xs:enumeration value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="resultCode">
+		<xs:restriction base="xs:token">
+			<!-- 成功 -->
+			<xs:enumeration value="00"/>
+			<!-- 失败 -->
+			<xs:enumeration value="01"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="errorCode">
+		<xs:restriction base="xs:token">
+			<!-- 必填项为空值或图片地址格式有误-->
+			<xs:enumeration value="10"/>
+			<!-- 该生基本信息不存在或已经受理-->
+			<xs:enumeration value="16"/>
+			<!-- 交款状态错误 -->
+			<xs:enumeration value="19"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="resultType">
+		<xs:all>
+			<xs:element name="resultCode" type="cardapply:resultCode"/>
+			<xs:element minOccurs="0" name="reSeq" type="xs:token"/>
+			<xs:element minOccurs="0" name="errorCode" type="cardapply:errorCode"/>
+		</xs:all>
+	</xs:complexType>
+</xs:schema>
+  </wsdl:types>
+  <wsdl:message name="ApplyOnlineResponse">
+    <wsdl:part element="tns:ApplyOnlineResponse" name="ApplyOnlineResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="ApplyOnlineRequest">
+    <wsdl:part element="tns:ApplyOnlineRequest" name="ApplyOnlineRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="cardApply">
+    <wsdl:operation name="ApplyOnline">
+      <wsdl:input message="tns:ApplyOnlineRequest" name="ApplyOnlineRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:ApplyOnlineResponse" name="ApplyOnlineResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="cardApplySoap11" type="tns:cardApply">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="ApplyOnline">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="ApplyOnlineRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="ApplyOnlineResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="cardApplyService">
+    <wsdl:port binding="tns:cardApplySoap11" name="cardApplySoap11">
+      <soap:address location="http://www.gzyct.com/card-student-online/applyCardOnlineService"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

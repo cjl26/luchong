@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  	<meta charset="utf-8">
+  	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+  	<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+	<#include "../common/header.html">
+	
+	<link rel="stylesheet" href="${resurcePath}/cloudpay/css/doubleselect/doubleselect.css"/>
+	<script src="${resurcePath}/cloudpay/js/doubleselect/doubleselect.js"></script>
+	
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+  <div class="wrapper">	
+  
+  <!-- 	顶部和左侧菜单的jsp s -->
+  <#include "../common/menu.html">
+  <!-- 	顶部和左侧菜单的jsp e -->
+  
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>
+       	分配角色
+      </h1>
+    </section>
+    
+    <section class="content-header condition clearfix ">
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+		<div class="container">
+		<div style="position: absolute;top: 20px;left: 85px;">未分配</div>
+		<div style="position: absolute;top: 17px;right: 118px;">已分配</div>
+		<ul class="data-list" id="lList">
+			<#if notSelected?exists>  
+			 <#list notSelected as key>  
+               		<li id='${key.id}'>${key.roleName}</li>
+        	  </#list> 
+        	 </#if>   
+		</ul>
+		
+		<div class="button-box">
+			<button type="button" name="button" id="add">添 加</button>
+			<button type="button" name="button" id="remove">删 除</button>
+		</div>
+		
+		<ul class="data-list" id="rList">
+			<#if hasSelected?exists>  
+			 <#list hasSelected as key>  
+               		<li id='${key.id}'>${key.roleName}</li>
+        	  </#list> 
+        	 </#if> 
+		</ul>
+		<button type="button" id="submitPrivilege" style="width: 100px;margin-left: 200px;" onclick="submitPrivilege();">提交</button>
+	</div>
+    </section>
+    <!-- /.content -->
+  </div>
+ 
+</div>
+<!-- ./wrapper -->
+</body>
+<script>
+    //未分配的权限id数组
+	var notSelected = [];
+    //已经分配的权限id数组
+	var hasSelected = [];
+    
+    //提交修改的权限
+    function submitPrivilege() {
+    	if(notSelected.length == 0 && hasSelected.length == 0) {
+    		alert("你没有改变角色");
+    	} else {
+    		 $.ajax({
+				 url : '/cloudpay/admin/saveRoles',
+				 type : "POST",
+				 async:false,
+				 dataType : "json",
+				 data : {roleIds:hasSelected,userId:'${Request.userId}'},
+				 success : function(result) {
+					 //如果返回成功
+					 if(result.result_code == successRespCode) {
+						 alert("修改成功");
+						 window.location.reload();
+					 } else {
+						 alert(result.err_msg);
+					 }
+				 }
+			 });
+    	}   	 
+    }
+</script>
+</html>

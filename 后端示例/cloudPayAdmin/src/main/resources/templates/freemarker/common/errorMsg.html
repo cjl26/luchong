@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<section class="content-header condition clearfix " style="padding:0px 14px">    	
+    <!-- <label class="control-label" for="inputError" style="color:#dd4b39;margin-bottom:0px;"><i class="fa fa-times-circle-o"></i>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</label><br/>
+    <label class="control-label" for="inputError" style="color:#dd4b39;width:370px;margin-bottom:0px;"><i class="fa fa-times-circle-o"></i>aaaaaaaaaaaaa</label><br/>
+    <label class="control-label" for="inputError" style="color:#dd4b39;width:370px;margin-bottom:0px;"><i class="fa fa-times-circle-o"></i>aaaaaaaaaaaa</label><br/>
+    <label class="control-label" for="inputError" style="color:#dd4b39;width:370px;margin-bottom:0px;"><i class="fa fa-times-circle-o"></i>aaaaaaaaaaaa</label><br/>
+    <label class="control-label" for="inputError" style="color:#dd4b39;width:370px;margin-bottom:0px;"><i class="fa fa-times-circle-o"></i>aaaaaaaaaaaaa</label><br/>         -->
+    
+      <#if errorMsgList?? && (errorMsgList?size > 0) >
+            <#list errorMsgList as errorMsg>
+ 				<label class="control-label" for="inputError" style="color:#dd4b39;width: 370px;max-width: 500px"><i class="fa fa-times-circle-o"></i> ${errorMsg}</label><br/>
+			</#list>                 
+      </#if>
+</section>

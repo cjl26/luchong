@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!-- Tell the browser to be responsive to screen width -->
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+<#include "../../common/header.html">
+
+<script src="${resurcePath}/cloudpay/js/uploadPreview/uploadPreview.min.js"></script>
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+	<div class="wrapper">
+
+		<!-- 	顶部和左侧菜单的jsp s -->
+		<#include "../../common/menu.html">
+		<!-- 	顶部和左侧菜单的jsp e -->
+
+		<!-- Content Wrapper. Contains page content -->
+		<div class="content-wrapper">
+			<!-- Content Header (Page header) -->
+			<section class="content-header">
+				<h1>编辑商户</h1>
+			</section>
+
+			<!-- Main content -->
+			<section class="content" style="padding-bottom: 0px;" id="content">
+				<!-- general form elements -->
+				<div class="box box-primary" style="width: 1000px; margin: 0 auto;">
+					<div class="box-header with-border">
+						<h3 class="box-title">商户信息</h3>
+					</div>
+					<!-- /.box-header -->
+					<!-- form start -->
+					<form action="/hicatcard/merchant/editMerchant" method="post" id="roleForm"  enctype="multipart/form-data">
+					    <input type="hidden" id="merchantId" name="merchantId" value="${Request.merchant.merchantId!}"/> 
+					    <input type="hidden" id="merchantNumber" name="merchantNumber" value="${Request.merchant.merchantNumber!}"/> 
+						<div class="box-body">
+							<div class="form-group">
+								<label for="name">商户名称</label>
+								<input type="text" class="form-control" id="name" name="name" value='${Request.merchant.name!}'/>
+							</div>
+							<div class="form-group">
+								<label for="phone">联系电话</label>
+								<input type="text" class="form-control" id="phone" name="phone" value='${Request.merchant.phone!}'/>
+							</div>
+							<div class="form-group">
+								<label for="address">地址</label>
+								<input type="text" class="form-control" id="address" name="address" value='${Request.merchant.address!}'/>
+							</div>
+							<div class="form-group">
+								<label for="detail">商家介绍</label>
+								<input type="text" class="form-control" id="detail" name="detail" value='${Request.merchant.detail!}'/>
+							</div>
+							<div class="form-group">
+								<label for="merchantPic">商家图片</label>
+								     <img <#if Request.merchant.pictureUrl??> src="${Request.merchant.pictureUrl!}"</#if> id="img_merchantPic" style="width:160px;height:100px;"/> 
+								<input type="file" class="form-control" id="merchantPic" name="merchantPic" style="display:none;" />
+							</div>
+							<div class="form-group">
+								<label for="merchantPic">商家详情图片</label>
+								     <img <#if Request.merchant.detailPictureUrl??> src="${Request.merchant.detailPictureUrl!}"</#if> id="img_merchantDetailPic" style="width:160px;height:100px;"/> 
+								<input type="file" class="form-control" id="merchantDetailPic" name="merchantDetailPic" style="display:none;" />
+							</div>
+							<div class="form-group">
+								<label for="webUrl">商家主页网址</label>
+								<input type="text" class="form-control" id="webUrl" name="webUrl" value='${Request.merchant.webUrl!}'/>
+							</div>
+							
+						   <div class="form-group">
+								<label for="type">状态</label> 
+								<select class="form-control select2" style="width: 100%;" name="status" id="status">
+									<#list statusMap?keys as key>
+ 										<option value="${key}" <#if (merchant.status?? && key??)&&(merchant.status?string == key)>selected="selected"</#if>>${statusMap[key]!}</option> 									
+ 									</#list>
+								</select>
+							</div>
+						</div>
+						<!-- /.box-body  @click="submit"-->
+						<div class="box-footer">
+						   	<label class="control-label" id="errorLabel" for="inputError" style="color:#dd4b39; width: 370px; max-width: 500px"></label><br/>
+							<button type="submit" class="btn btn-primary">提交</button>
+							<button type="reset" class="btn btn-primary" >清空</button>
+						</div>
+					</form>
+				</div>
+				<!-- /.box -->
+			</section>
+			<!-- /.content -->
+		</div>
+
+	</div>
+	<!-- ./wrapper -->
+</body>
+<script>
+$(function() {
+	//校验器
+	var formValidator = $("#roleForm").validate({
+				onkeyup : false,
+				focusInvalid : false,  //错误时,错误选项不会得到焦点
+				focusCleanup : true,   //得到焦点时，清空错误提示信息
+				rules : {						
+					phone : {
+						digits:true
+					},
+					address : {
+						required : true
+					}
+				},
+				messages : {		
+					phone : {
+						digits:"请输入正确手机号码"						
+					},
+					address : {
+						required : "请输入地址"
+					}
+				}
+			});
+	
+	new uploadPreview({
+		UpBtn : "merchantPic",
+		ImgShow : "img_merchantPic"
+	});
+
+	$("#img_merchantPic").click(function() {
+		$("#merchantPic").click();
+	});
+	
+	new uploadPreview({
+		UpBtn : "merchantDetailPic",
+		ImgShow : "img_merchantDetailPic"
+	});
+
+	$("#img_merchantDetailPic").click(function() {
+		$("#merchantDetailPic").click();
+	});
+});
+
+</script>
+</html>

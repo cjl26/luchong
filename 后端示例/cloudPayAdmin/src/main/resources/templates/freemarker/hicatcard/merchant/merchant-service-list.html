@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!-- Tell the browser to be responsive to screen width -->
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+<#include "../../common/header.html">
+
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+	<div class="wrapper">
+		<!-- 	顶部和左侧菜单的jsp s -->
+		<#include "../../common/menu.html">
+		<!-- 	顶部和左侧菜单的jsp e -->
+
+		<!-- Content Wrapper. Contains page content -->
+		<div class="content-wrapper">
+			<!-- Content Header (Page header) -->
+			<section class="content-header">
+				<h1>商户服务项列表</h1>
+			</section>
+
+			<section class="content-header condition clearfix ">
+				<form action="#" id="fromCondition">
+					<div class="form-group">
+						<label>商户编号:</label> 
+						<input type="text" class="form-control" name="search_LK_STRING_merchantNumber">
+					</div>
+					<div class="form-group">
+						<label>商户名称:</label> 
+						<input type="text" class="form-control" name="search_LK_STRING_name">
+					</div>
+					<div class="form-group">
+						<label>联系电话:</label> 
+						<input type="text" class="form-control" name="search_LK_STRING_phone">
+					</div>
+					<div class="form-group">
+						<label>服务名称:</label> 
+						<input type="text" class="form-control" name="search_LK_STRING_serviceName">
+					</div>
+					<!-- <div class="form-group">
+         				<label>状态:</label>
+        			    <select class="form-control select2" style="width: 100%;" name="search_EQ_STRING_status">
+           	  			<option selected="selected" value="">全部</option>
+           	  				<#list statusMap?keys as key>  
+               					<option value="${key}">${statusMap[key]!}</option>
+        	  				</#list>  
+          				</select>
+    				</div>  -->
+					<!-- /.form group -->
+					<div class="form-group"
+						style="margin-top: 28px; margin-left: 15px;">
+						<input type="submit" value="查询" id="submit"/>&nbsp&nbsp
+						<input type="reset" value="清空" id="reset" />
+					</div>
+				</form>
+			</section>
+
+			<!-- Main content -->
+			<section class="content" style="padding-bottom: 0px;">
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="box">
+							<!-- /.box-header -->
+							<div class="box-body">
+								<table id="dataTable" class="table table-bordered table-striped" style="width:1700px">
+									<thead>
+										<tr>
+											<th>选择</th>
+											<th>商户编号</th>
+											<th>商户名称</th>
+											<th>地址</th>
+											<th>联系电话</th>																			
+											<th>服务名称</th>
+											<th>价格</th>
+											<!-- <th>状态</th>	 -->
+											<th>操作</th>									
+										</tr>
+									</thead>
+								</table>
+							</div>
+							<!-- /.box-body -->
+						</div>
+						<!-- /.box -->
+					</div>
+					<!-- /.col -->
+				</div>
+				<!-- /.row -->
+			</section>
+			<!-- /.content -->
+
+
+		<!-- 	<section class="content-header condition clearfix " style="padding: 0px 14px">
+				<button onclick="window.location.href='/hicatcard/merchant/toMerchantEditPage';" class="btn btn-default" style="margin-right: 10px">新增商户</button>
+			</section>
+			 -->
+			 <#include "../../common/errorMsg.html">
+		</div>
+
+	</div>
+	<!-- ./wrapper -->
+</body>
+<script>
+ /*  存放选中行的id的数组 */
+  var selected = [];
+  
+  //adminlte表格的对象
+  var datatable = null;
+  var formValidator = null;
+  
+  $(function () {
+		    
+	   var vm = new Vue({
+	 		 el: '#fromCondition',
+		    methods: {
+		    	submitForm: function () {
+				  	datatable.draw();
+				  	//每次重画后,清空选中的记录
+		    		selected.splice(0,selected.length)
+		    	}
+      	  }
+  	  })
+	   
+	   //校验器
+		  formValidator = $("#fromCondition").validate({
+				onkeyup : false,
+				focusInvalid : false,  //错误时,错误选项不会得到焦点
+				focusCleanup : true,   //得到焦点时，清空错误提示信息
+				submitHandler : function() { //表单提交句柄,为一回调函数，带一个参数：form
+					vm.submitForm();
+				},
+				rules : {},
+				messages : {}
+		  });
+	          
+      datatable = $('#dataTable').DataTable({
+           'paging'      : true,
+           'lengthChange': true,
+           'searching'   : false,
+           'ordering'    : true,
+           'info'        : true,
+           'autoWidth'   : false,
+           "scrollX"	 : true,
+           "scrollY"	 : true ,  
+           "processing"	 : true,
+           "serverSide"	 : true,
+           "order": [[ 0, 'desc' ]],
+           "pagingType": "full_numbers",
+           "language": {
+               "lengthMenu":   "显示 _MENU_ 条记录",
+               "zeroRecords":  "没有符合条件的记录",
+               "info":         "第 _PAGE_ 页,共 _PAGES_ 页",
+               "infoEmpty":    "没有符合条件的记录",
+               "paginate": {
+            	   "first":     "第一页",
+            	   "next":      "下一页",
+            	   "previous":  "上一页",
+            	   "last":      "最后一页"
+                }           	  
+           },
+           //如果查询条件有校验，需要加这个
+           "preDrawCallback": function( settings ) {
+        	   if(!isEmpty(formValidator)) {
+        		   if(!formValidator.valid()) {
+            		   return false;
+            	   }
+        	   }        	
+        	},
+           "drawCallback": function( settings ) {
+        	   //每次重画后,清空选中的记录
+	    		selected.splice(0, selected.length);
+           },
+           "ajax": {
+               "url": "/hicatcard/merchantService/getMerchantServiceListData",
+               "type": "POST",
+               "data": function ( d ) {
+            	  var formData = $("#fromCondition").serializeJson();
+            	  for(var obj in formData)  {
+            		  d[obj+""] = formData[obj];
+            	  }
+              }
+           },
+           "columns": [     
+               { "data": "merchantServiceId", "orderable": false,"render":function(data, type, full, meta) {
+    	            	   return  '<input type="checkbox" value="' + data + '">';
+    	       }},        
+               { "data": "merchantNumber" },
+               { "data": "name" },
+               { "data": "address" },
+               { "data": "phone" },
+               { "data": "serviceName" },
+               { "data": "fee" ,"render":function(data, type, full, meta) {
+            	   return new BigDecimal(data+"").multiply(new BigDecimal("0.01")).setScale(2, MathContext.ROUND_HALF_UP).toString();
+               }},
+             /*   { "data": "status",
+	            	"render": function ( data, type, full, meta ) {     
+		           		<#list statusMap?keys as key>
+		         			if(data == '${key}') {
+		         				return '${statusMap[key]!}';
+		   					}
+						</#list>
+	  		   }}, */
+               { "data": "merchantServiceId",
+            	   "render": function ( data, type, full, meta ) {   
+            		   return '<button onclick="editMerchantService(' + data + ');" class="btn btn-default" style="margin-right: 10px">编辑信息</button>'
+            		   		+ '<button onclick="deleteMerchantService(' + data + ');" class="btn btn-default" style="margin-right: 10px">删除</button>';            		   
+	  			}}	  		 
+			]
+         })
+});
+
+
+function deleteMerchantService(merchantServiceId){
+	var r = confirm("是否删除商户服务项");
+	if (r == false) {
+	    return;
+	}
+	
+	//发送ajax
+    $.ajax({
+        url: '/hicatcard/merchantService/deleteMerchantService',    
+        type: 'POST',
+        data: { merchantServiceId: merchantServiceId},
+        dataType:"json",
+        success: function (result) {  
+            if(result.result_code == successRespCode){
+           	 	alert("刪除商户服务项成功");
+           	 	window.location.reload();
+          	} else {
+          		alert(result.error_message);
+          	} 
+        }, 
+        error:function (XMLHttpRequest, textStatus, errorThrown) {
+           alert("网络繁忙，请稍后再试");
+        },
+   });
+}
+
+
+//编辑信息
+function editMerchantService(merchantServiceId){
+	
+	window.location.href="/hicatcard/merchantService/toMerchantServiceEditPage?merchantServiceId=" + merchantServiceId;
+	
+}
+
+</script>
+<script src="${resurcePath}/cloudpay/js/common/dataTable.js"></script>
+</html>
+

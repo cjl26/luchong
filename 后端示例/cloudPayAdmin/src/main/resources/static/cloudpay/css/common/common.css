@@ -1,0 +1,37 @@
+.condition form > div{
+	float: left;
+	margin-right: 10px;
+}
+
+ .condition .form-group  {
+	width: 280px !important;
+} 
+
+/*
+ * 解决高度塌陷问题clearfix
+ */
+.clearfix:before,
+.clearfix:after{
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.clearfix{
+	zoom:1;
+}
+
+table.dataTable tbody tr.selected {
+	background-color: #B0BED9
+}
+
+/* jquery.validate的自定义样式 */
+label.error {
+	background-image:url("../../img/cross.png");
+	background-repeat:no-repeat;
+	font-size: 12px;
+	font-family: '微软雅黑';
+	font-weight: bold;
+	color: red;
+	padding-left: 15px;
+}

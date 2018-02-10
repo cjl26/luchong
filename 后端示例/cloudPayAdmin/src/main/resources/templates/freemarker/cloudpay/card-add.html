@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!-- Tell the browser to be responsive to screen width -->
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+<#include "../common/header.html">
+
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+	<OBJECT id="myActivex"
+		classid="clsid:46059496-E96D-45D7-9DB4-2240411F1AF1"
+		codebase="/cloudpay/embed/gzyct_ytp.cab#version=1,0,0,10" width="0" height="0"></OBJECT>
+	<div class="wrapper">
+
+		<!-- 	顶部和左侧菜单的jsp s -->
+		<#include "../common/menu.html">
+		<!-- 	顶部和左侧菜单的jsp e -->
+
+		<!-- Content Wrapper. Contains page content -->
+		<div class="content-wrapper">
+			<!-- Content Header (Page header) -->
+			<section class="content-header">
+				<h1>增加卡片记录</h1>
+			</section>
+
+
+
+			<!-- Main content -->
+			<section class="content" style="padding-bottom: 0px;" id="content">
+				<!-- general form elements -->
+				<div class="box box-primary" style="width: 1000px; margin: 0 auto;">
+					<div class="box-header with-border">
+						<h3 class="box-title">卡片信息</h3>
+					</div>
+					<!-- /.box-header -->
+					<!-- form start -->
+					<form role="form"  action="/cloudpay/card/addUserCardAction" method="post" id="conditionForm">
+<!-- 						<div class="box-body">
+							<div class="form-group">
+								
+ 								<button type="submit" class="btn btn-primary btn-block btn-flat" v-text="loginCardNumber"></button>	
+									
+ 								<button type="button" class="btn btn-primary" style="margin-top: 5px;"
+									@click="connect">连接</button>
+								<button type="button" class="btn btn-primary" style="margin-top: 5px;" onclick="aaa();">连接111</button>
+							</div>
+						</div> -->
+						<div class="box-body">
+							<div class="form-group">
+								<label for="exampleInputPort">请输入连接端口(格式：USB+PKI卡号(USB89000000))</label>
+								<input type="text" class="form-control" id="exampleInputPort">
+								
+								
+								<!-- <button type="button" class="btn btn-primary" style="margin-top: 5px;"
+									@click="getCardNumber">读取卡号</button> -->
+							</div>
+							<div class="form-group">
+								<label for="phone">手机号码</label> 
+								<input type="text" class="form-control" id="phone" name="phone">
+							</div>
+							<div class="form-group">
+								<label for="cardNumber">卡片号码</label> 
+								<input type="text" class="form-control" id="cardNumber" name="cardNumber" value='' disabled="disabled">
+							</div>
+<!-- 							<div class="form-group">
+								<label for="">结果</label> 
+								<textarea rows="40" cols="100" id="result" ></textarea>
+							</div> -->
+							
+						</div>
+						<!-- /.box-body -->
+
+						<div class="box-footer">
+							<input type="hidden" id="addCardResponseId" value='${addCardResponse!}'>
+						   	<label class="control-label" id="errorLabel" for="inputError" style="color:#dd4b39;width: 370px;max-width: 500px">{{addCardResponse.err_msg}}</label><br/>
+							<button type="button" class="btn btn-primary" @click="submit">提交</button>
+							<!-- <button type="reset" class="btn btn-primary" >清空</button>
+							<button type="button" class="btn btn-primary" @click="back">返回</button> -->
+						</div>
+					</form>
+				</div>
+				<!-- /.box -->
+			</section>
+			<!-- /.content -->
+		</div>
+
+	</div>
+	<!-- ./wrapper -->
+</body>
+<script>
+	var psamCardNumber = '';
+	//alert($("#addCardResponseId").val());
+	var addCardResponse = "";
+	if($("#addCardResponseId").val() !== '')
+	{
+		addCardResponse = JSON.parse($("#addCardResponseId").val());
+	}
+	
+	
+	
+$(function () {
+	
+	var vm = new Vue(
+			{
+				data : {
+					addCardResponse : addCardResponse
+				},
+				el : '#content',
+				mounted : function(){
+					getCookie();
+					//回显上次进入页面输入的Pki
+					echoUsbPki();
+				},
+				methods : {
+					back : function(){
+						history.back(-1);
+					},
+					connect : function(){
+						var input = document.getElementById("cardNumber");
+						//input.value = "sfafd";
+					},
+					submit : function(){
+						setPkiToLocalStorage();
+						$("#errorLabel").html("");
+						if(validForm().form() == false)
+						{
+							return;
+						}
+						
+						var phone = $("#phone").val();
+						if(phone.length != 11)
+						{
+							$("#errorLabel").html("请输入11位手机号码");
+							return;
+						}
+						
+						if(!readCardNumber())
+						{
+							return
+						}
+						var cardNumber = $("#cardNumber").val();
+						
+					    $.ajax({    
+					         url: '/cloudpay/card/addUserCardAction',    
+					         type: 'POST',
+					         data: { phone: phone, cardNumber: cardNumber },
+					         success: function (result) {    
+					             this.addCardResponse = JSON.parse(result);
+					             if(this.addCardResponse.result_code == '0')
+					           	 {
+					            	 //alert("绑定成功");
+					            	 activate();
+					            	 //alert("after activate");
+					           	 }
+					             else
+					             {
+					            	 $("#errorLabel").html(this.addCardResponse.err_msg);//.val(retObject.err_msg);
+					             }					             
+					         },
+					         error: function (result) {    
+					             alert("绑定请求失败");    
+					         }    
+					    });
+					},
+					getCardNumber : function(){
+						readCardNumber();
+					}
+				}
+			});
+	
+	
+	function validForm(){
+		return $("#conditionForm").validate(
+				{
+					onkeyup : false,
+					focusInvalid : false,  //错误时,错误选项不会得到焦点
+					focusCleanup : true,   //得到焦点时，清空错误提示信息
+					submitHandler : function() { //表单提交句柄,为一回调函数，带一个参数：form
+						vm.submitForm();
+					},
+					rules : {						
+						phone : {
+							minlength:11,
+							maxlength:11,
+							number:true
+						}
+					},
+					messages : {
+						phone : {
+							minlength:"手机号长度11位",
+							maxlength:"手机号长度11位",
+							number:"手机号为数字"
+						}
+					}
+				});
+	}
+	$(validForm());
+});
+
+
+	//判断返回字符串是否符合条件
+	function whetherContinue(inputData, judgeDate) {
+		if (inputData == null || inputData == undefined || inputData == ''
+				|| inputData.length < 4) {
+			alert("读取数据空，请重试");
+			return false;
+		}
+
+		//alert("substring = " + inputData.substring(inputData.length - 4, inputData.length));
+		//alert("judgeDate = " + judgeDate);
+
+		if (inputData.substring(inputData.length - 4, inputData.length) == judgeDate) {
+			//alert("继续");
+			//alert("inputData = " + inputData);
+			return true;
+		} else {
+			//alert("inputData = " + inputData);
+			return false;
+		}
+	}
+
+	function setPort() {
+		var port = document.getElementById("port").value;
+		contoller.SetSerial("Port", port);
+		//alert('OK');
+	}
+	
+	function setCookie(value)
+	{
+		//alert("setCookie value = " + value);
+		var c_name = "PKI";
+		var exdate=new Date();
+		exdate.setDate(exdate.getDate()+365);
+		document.cookie=c_name+ "=" +escape(value);	//+((expiredays==null) ? "" : ";expires="+exdate.toGMTString())
+		//alert("document.cookie = " + document.cookie.length);
+	}
+	
+	function getCookie()
+	{
+		//alert("getCookie");
+		var c_name = "PKI";
+		if (document.cookie.length > 0)
+		{
+			c_start=document.cookie.indexOf(c_name + "=");
+			if (c_start!=-1)
+			{ 
+				c_start=c_start + c_name.length+1;
+				c_end=document.cookie.indexOf(";",c_start);
+		    	if (c_end==-1) 
+		    	{
+		    		c_end=document.cookie.length;
+		    	}
+		    	//return unescape(document.cookie.substring(c_start,c_end));
+		    	var pkiInput = document.getElementById("exampleInputPort");
+		    	pkiInput.value = unescape(document.cookie.substring(c_start,c_end));
+		    	//alert("pkiInput.value = " + pkiInput.value);
+		    	return;
+		  	} 
+		}
+		//alert("return empty");
+		return;
+	}
+	
+	function readCardNumber()
+	{
+		//连接
+		var controller = document.getElementById("myActivex");
+		var port = document.getElementById("exampleInputPort").value;
+		if(port == null || port == undefined || port == ''){
+			alert("请输入连接信息");
+			return false;
+		}
+		controller.SetSerial("Port", port);
+		setCookie(port);
+		
+		var ret = controller.Card_OP("32010700A40000023F00");
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程1");
+			return false;
+		}
+
+		ret = controller.Card_OP("32010500B0960006");
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程2");
+			return false;
+		}
+
+		//记录psam卡号
+		psamCardNumber = ret.substring(3, ret.length - 4)
+
+		ret = controller
+				.Card_OP("32010B0020000006313233343536");
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程3");
+			return false;
+		}
+
+		ret = controller.Card_OP("32010700A40000021001");
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程4");
+			return false;
+		}
+
+		//alert("连接成功 PSAM卡号为 = " + psamCardNumber);
+
+		ret = controller.Card_OP("4552");
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程5 寻卡失败");
+			return false;
+		}
+
+		//获取物理卡号
+		ret = controller.Card_OP("4705C4FE000000");
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程6");
+			return false;
+		}
+
+		//alert("phycicalCardNumber ret = " + ret);
+		var phycicalCardNumber = ret.substring(5, 21);
+		//alert("phycicalCardNumber = " + phycicalCardNumber);
+
+		ret = controller.Card_OP("470700a4000002ddf1");
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程7");
+			return false;
+		}
+
+		//获取逻辑卡号
+		ret = controller.Card_OP("470500B0950808");
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程8");
+			return false;
+		}
+		//alert("logicCardNumber ret = " + ret);
+		var logicCardNumber = ret.substring(5, 21);
+		var input = document.getElementById("cardNumber");
+		input.value = logicCardNumber.substring(6, 16);
+		return true;
+	}
+	
+	//USB PKI保存到localstorage，这样不用输入
+	function setPkiToLocalStorage() {
+		var pki = $("#exampleInputPort").val();
+		if(!isEmpty(pki)) {
+			 //设置入本地缓存
+			 window.localStorage.setItem("cardAddUsbPki",pki);
+		}
+	}
+	
+	//为USBPKI文本框设置上一次输入的值
+	function echoUsbPki() {
+		var pki = window.localStorage.getItem("cardAddUsbPki");
+		if(!isEmpty(pki)) {
+			$("#exampleInputPort").val(pki);
+		}
+	}
+	
+	function activate () 
+	{
+		
+		//var result=document.getElementById("result");
+		
+		//连接
+		var controller = document.getElementById("myActivex");
+		var port = document.getElementById("exampleInputPort").value;
+		if(port == null || port == undefined || port == ''){
+			alert("请输入连接信息");
+			return;
+		}
+		controller.SetSerial("Port", port);
+		//alert('连接信息已发送，请尝试放卡激活');
+
+		var ret = controller.Card_OP("32010700A40000023F00");
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程1");
+			return;
+		}
+
+		ret = controller.Card_OP("32010500B0960006");
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程2");
+			return;
+		}
+
+		//记录psam卡号
+		psamCardNumber = ret.substring(3, ret.length - 4)
+
+		ret = controller
+				.Card_OP("32010B0020000006313233343536");
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程3");
+			return;
+		}
+
+		ret = controller.Card_OP("32010700A40000021001");
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程4");
+			return;
+		}
+
+		//alert("连接成功 PSAM卡号为 = " + psamCardNumber);
+
+		ret = controller.Card_OP("4552");
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程5 寻卡失败");
+			return;
+		}
+
+		//获取物理卡号
+		ret = controller.Card_OP("4705C4FE000000");
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程6");
+			return;
+		}
+
+		//alert("phycicalCardNumber ret = " + ret);
+		var phycicalCardNumber = ret.substring(5, 21);
+		//alert("phycicalCardNumber = " + phycicalCardNumber);
+
+		ret = controller.Card_OP("470700a4000002ddf1");
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程7");
+			return;
+		}
+
+		//获取逻辑卡号
+		ret = controller.Card_OP("470500B0950808");
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程8");
+			return;
+		}
+		//alert("logicCardNumber ret = " + ret);
+		var logicCardNumber = ret.substring(5, 21);
+		//alert("logicCardNumber = " + logicCardNumber);
+		
+		//loginCardNumber = logicCardNumber.substring(6, 16);
+		ret = controller.Card_OP("470700a4000002adf2");
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程9");
+			return;
+		}
+
+		var commandForFirst = "4711805003020B0100000000"
+				+ psamCardNumber + "0F";
+		ret = controller.Card_OP(commandForFirst);
+		//result.value='send 10: ' + commandForFirst + '\n\r' + result.value;
+		//result.value='get 10: ' + ret + '\n\r' + result.value;
+		
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程10");
+			return;
+		}
+
+		var retForFirst = ret.substring(13, 17);
+		var retForSecond = ret.substring(27, 35);
+		//alert("ret for 3201= " + ret);
+		//alert("retForFirst = " + retForFirst);
+		//alert("retForSecond = " + retForSecond);
+
+		//激活功能 -> 471B80DC1840161814008002010000000000000000000000007BD5C66F
+		//非激活发送 -> 471B80DC18401618140000000000000000000000000000000000000000
+		ret = controller
+				.Card_OP("471B80DC1840161814008002010000000000000000000000007BD5C66F");
+		//ret = controller.Card_OP("471B80DC18401618140000000000000000000000000000000000000000");
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程11");
+			return;
+		}
+
+		//result.value='send 11: ' + '471B80DC1840161814008002010000000000000000000000007BD5C66F' + '\n\r' + result.value;
+		//result.value='get 11: ' + ret + '\n\r' + result.value;
+
+		
+		var timeNow = getFormatNowDateTime();
+		timeNow = timeNow + "00000000000000";
+		timeNow = timeNow.substring(0, 14);
+		//alert("phycicalCardNumber.substring(0,10) = " + phycicalCardNumber.substring(0,10));
+		//alert("phycicalCardNumber.substring(14,16) = " + phycicalCardNumber.substring(14,16));
+		//alert("logicCardNumber.substring(12,16) = " + logicCardNumber.substring(12,16));
+
+		
+		var commandForSecond = "32012A8070000024"
+				+ retForSecond + retForFirst + "0000000009"
+				+ timeNow + "0100"
+				+ phycicalCardNumber.substring(0, 10)
+				+ phycicalCardNumber.substring(14, 16)
+				+ logicCardNumber.substring(12, 16)
+				+ "5100000000000000" + "08";
+		
+		//alert("3201 commandForSecond = " + commandForSecond);
+		
+		ret = controller.Card_OP(commandForSecond);
+		//result.value='send 12: ' + commandForSecond+'\n\r'+result.value;
+		//result.value='get 12: ' + ret + '\n\r' + result.value;
+		
+		//alert("ret for 3201 = " + ret);
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程12");
+			return;
+		}
+
+		var retForThird = ret.substring(3, 11);
+		var retForFourth = ret.substring(11, 19);
+		//alert("retForThird = " + retForThird);
+		//alert("retForFourth = " + retForFourth);
+
+		var commandForThird = "4715805401000F" + retForThird
+				+ timeNow + retForFourth + "08";
+		//alert("4715 commandForSecond = " + commandForThird);
+		ret = controller.Card_OP(commandForThird);
+		//alert("ret for 4715 = " + ret);
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程13");
+			return;
+		}
+
+		var retForFifth = ret.substring(13, 21);
+		//alert("retForFifth = " + retForFifth);
+		var commandForForth = "3201098072000004" + retForFifth;
+		//alert("3201 commandForForth = " + commandForForth);
+		ret = controller.Card_OP(commandForForth);
+		//alert("ret for 3201 = " + ret);
+		if (whetherContinue(ret, '9000') == false) {
+			alert("结束流程14");
+			return;
+		}
+		
+		var input = document.getElementById("cardNumber");
+		input.value = logicCardNumber.substring(6, 16);
+		alert("激活成功");
+		
+	}
+
+	//alert("add");
+	//var controller = document.getElementById("myActivex");
+	//alert("controller = " + controller);
+	//controller.SetSerial("BaudRate", "57600");
+	//document.getElementById("port").value= controller.getSerial('Port');
+	//alert("good = " + controller.getSerial('Port'));
+	//alert("32010700A40000023F00 = " + controller.Card_OP("32010700A40000023F00"));
+</script>
+
+<script src="${resurcePath}/cloudpay/js/common/dataTable.js"></script>
+
+</html>

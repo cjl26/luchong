@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!-- Tell the browser to be responsive to screen width -->
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+<#include "../../common/header.html">
+
+<link rel="stylesheet" href="${resurcePath}/cloudpay/css/loading/jquery.mloading.css">
+<script src="${resurcePath}/cloudpay/js/uploadPreview/uploadPreview.min.js"></script>
+<script src="${resurcePath}/cloudpay/js/loading/jquery.mloading.js"></script>
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+	<div class="wrapper">
+
+		<!-- 	顶部和左侧菜单的jsp s -->
+		<#include "../../common/menu.html">
+		<!-- 	顶部和左侧菜单的jsp e -->
+
+		<!-- Content Wrapper. Contains page content -->
+		<div class="content-wrapper">
+			<!-- Content Header (Page header) -->
+			<section class="content-header">
+				<h1>批量制卡</h1>
+			</section>
+
+			<!-- Main content -->
+			<section class="content" style="padding-bottom: 0px;" id="content">
+				<!-- general form elements -->
+				<div class="box box-primary" style="width: 1000px; margin: 0 auto;">
+					<div class="box-header with-border">
+						<h3 class="box-title">批量制卡信息</h3>
+					</div>
+					<!-- /.box-header -->
+					<!-- form start -->
+					<form action="/hicatcard/systempensentcard/batchMakeCard" method="post" id="roleForm"  enctype="multipart/form-data">
+					   	    
+							<div class="box-body">
+							<div class="form-group">
+								<label for="cardId">数量</label>
+								<input type="text" class="form-control" id="amount" name="amount" /> 
+							</div>						
+							<div class="form-group">
+								<label for="cardId">卡片标识</label> 
+								<select class="form-control select2" style="width: 100%;" name="cardId" id="cardId">
+									<#list cardList as card>										
+ 										<option value="${card.cardId}">${card.cardName!}</option> 									
+ 									</#list>
+								</select>
+							</div>							
+						</div>
+						<!-- /.box-body  @click="submit"-->
+						<div class="box-footer">
+							<button type="submit" class="btn btn-primary">提交并导出</button>
+							<a target="_blank" id='downloadBatchMakeCard'><button type="button" class="btn btn-primary">导出</button></a>
+							<button type="reset" class="btn btn-primary" >清空</button>
+						</div>
+					</form>
+				</div>
+				<!-- /.box -->
+			</section>
+			<!-- /.content -->
+		</div>
+
+	</div>
+	<!-- ./wrapper -->
+</body>
+<script>
+$(function() {
+	
+	
+	
+	//校验器
+	var formValidator = $("#roleForm").validate({
+				onkeyup : false,
+				focusInvalid : false,  //错误时,错误选项不会得到焦点
+				focusCleanup : true,   //得到焦点时，清空错误提示信息
+				submitHandler : function() { //表单提交句柄,为一回调函数，带一个参数：form
+					var cardId = $("#cardId  option:selected").val();
+				    var amount = $("#amount").val();
+					 $.ajax({
+						 url : '/hicatcard/systempensentcard/batchMakeCard',
+						 type : "POST",
+						 data : {cardId : cardId,amount:amount},
+						 beforeSend :function() {
+							  $("body").mLoading("show");
+						 },
+						 success : function(result) {
+							 $("#downloadBatchMakeCard").attr("href",result);
+							 window.location.href = result;
+						 },
+						 complete : function() {
+							 $("body").mLoading("hide");
+						 }
+						
+					 });	
+				},
+				rules : {						
+					amount : {
+						required:true,
+						digits:true
+					}
+				},
+				messages : {		
+					amount : {
+						required:"请输入数量",
+						digits:"只能输入整数"
+					}					
+				}
+			});
+	
+});
+
+/* function showLoading() {
+	alert(1);
+	$('body').loading({
+		loadingWidth:240,
+		title:'请稍等!',
+		name:'test',
+		discription:'二维码导出中,请不要撤销页面',
+		direction:'column',
+		type:'origin',
+		// originBg:'#71EA71',
+		originDivWidth:40,
+		originDivHeight:40,
+		originWidth:6,
+		originHeight:6,
+		smallLoading:false,
+		loadingMaskBg:'rgba(0,0,0,0.2)'
+	});
+	
+	setTimeout(function(){
+		removeLoading('test');
+	},3000);
+}
+
+function removeLoading() {
+	removeLoading('test');
+} */
+</script>
+</html>

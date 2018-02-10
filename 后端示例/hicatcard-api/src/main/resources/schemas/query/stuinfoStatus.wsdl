@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:sch="http://www.gzyct.com/studentcard/definitions/querystatus" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.gzyct.com/studentcard/definitions/querystatus" targetNamespace="http://www.gzyct.com/studentcard/definitions/querystatus">
+  <wsdl:types>
+    <xs:schema xmlns:stuinfostatus="http://www.gzyct.com/studentcard/definitions/querystatus" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.gzyct.com/studentcard/definitions/querystatus">
+	<xs:element name="QueryStatusRequest">
+		<xs:complexType>
+			<xs:all>
+				<!-- 审核流程号 -->
+				<xs:element name="seq" type="xs:token"/>
+			</xs:all>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="QueryStatusResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="result" type="stuinfostatus:resultType"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:simpleType name="resultCode">	
+		<xs:restriction base="xs:token">		
+			<!-- 成功 -->
+			<xs:enumeration value="00"/>
+			<!-- 失败 -->
+			<xs:enumeration value="01"/>
+		</xs:restriction>		
+	</xs:simpleType>
+	
+	<xs:simpleType name="errorCode">	
+		<xs:restriction base="xs:token">	
+			<!-- 必填项为空值-->
+			<xs:enumeration value="10"/>	
+			<!-- 不存在该流水号-->
+			<xs:enumeration value="21"/>		
+			<!-- 该流水号相关状态不存在 -->
+			<xs:enumeration value="22"/>	
+		</xs:restriction>		
+	</xs:simpleType>
+	
+	<xs:complexType name="resultType">
+		<xs:all>
+			<xs:element name="resultCode" type="stuinfostatus:resultCode"/>
+			<xs:element minOccurs="0" name="status" type="xs:token"/>
+			<xs:element minOccurs="0" name="errorCode" type="stuinfostatus:errorCode"/>
+			<xs:element minOccurs="0" name="clientId" type="xs:token"/>
+			<xs:element minOccurs="0" name="printStatus" type="xs:token"/>
+		</xs:all>
+	</xs:complexType>
+</xs:schema>
+  </wsdl:types>
+  <wsdl:message name="QueryStatusRequest">
+    <wsdl:part element="tns:QueryStatusRequest" name="QueryStatusRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="QueryStatusResponse">
+    <wsdl:part element="tns:QueryStatusResponse" name="QueryStatusResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="stuinfoStatus">
+    <wsdl:operation name="QueryStatus">
+      <wsdl:input message="tns:QueryStatusRequest" name="QueryStatusRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:QueryStatusResponse" name="QueryStatusResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="stuinfoStatusSoap11" type="tns:stuinfoStatus">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="QueryStatus">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="QueryStatusRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="QueryStatusResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="stuinfoStatusService">
+    <wsdl:port binding="tns:stuinfoStatusSoap11" name="stuinfoStatusSoap11">
+      <soap:address location="http://www.gzyct.com/card-query-status/queryStatusService"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

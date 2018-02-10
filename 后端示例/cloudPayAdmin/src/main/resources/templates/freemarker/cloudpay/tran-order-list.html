@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!-- Tell the browser to be responsive to screen width -->
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  
+  <#include "../common/header.html">
+
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+  <div class="wrapper">	
+  
+  <!-- 	顶部和左侧菜单的jsp s -->
+  <#include "../common/menu.html">
+  <!-- 	顶部和左侧菜单的jsp e -->
+  
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>
+       	交易记录查询
+      </h1>
+    </section>
+    
+    <section class="content-header condition clearfix ">
+    <form action="#" id="fromCondition">
+     <div class="form-group" >
+         <label>卡号:</label>
+         <input type="text" class="form-control" name="search_EQ_STRING_cardNum">
+     </div>
+     
+      <div class="form-group" >
+         <label>终端号:</label>
+         <input type="text" class="form-control" name="search_EQ_STRING_termCode">
+     </div>
+     
+     <!-- Date range -->
+          <div class="form-group">
+              <label>创建时间:</label>
+               <div class="input-group">
+                  <div class="input-group-addon">
+                  <i class="fa fa-calendar"></i>
+               </div>
+              <input type="text" class="form-control pull-right daterange" name="search_DATERANGE_STRING_createTime"/>
+             </div>
+            <!-- /.input group -->
+        </div>
+        
+         <div class="form-group">
+              <label>交易时间:</label>
+               <div class="input-group">
+                  <div class="input-group-addon">
+                  <i class="fa fa-calendar"></i>
+               </div>
+              <input type="text" class="form-control pull-right daterange" name="search_DATERANGE_STRING_transactionTime"/>
+             </div>
+            <!-- /.input group -->
+        </div>
+     <!-- /.form group -->
+       <div class="form-group"  style="margin-top: 28px;margin-left: 15px;">
+              <input type="submit" value="查询" id="submit"/>&nbsp&nbsp
+              <input type="reset" value="清空" id="reset"/>
+        </div>
+    </form>
+    </section>
+
+    <!-- Main content -->
+    <section class="content" style="padding-bottom: 0px;">
+      <div class="row">
+        <div class="col-xs-12">
+         
+
+          <div class="box">
+          
+            <!-- /.box-header -->
+            <div class="box-body">
+              <table id="dataTable" class="table table-bordered table-striped" style="min-width: 1623px">
+                <thead>
+                <tr>
+                  <th>选择</th>                  
+                  <th>用户标识</th>
+                  <th>卡号</th>
+                  <th>交易金额</th>
+                  <th>商户外部订单号</th>
+                  <th>终端号</th>
+                  <th>交易时间</th>
+                  <th>创建时间</th>
+                  <th>更新时间</th>
+                  <th>商户代码</th>
+                  <th>商户名称</th>                
+                </tr>
+                </thead>
+              </table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+    </section>
+    <!-- /.content -->
+    
+  <!--  <section class="content-header condition clearfix " style="padding: 5px 14px">
+    <form action="/cloudpay/card/importUserAction" method="POST" enctype="multipart/form-data">
+     	 <div class="form-group">
+                  <label for="exampleInputFile">导入用户</label>
+                  <input type="file" name="userFile"/>
+                  <#if errorMsgList?? && (errorMsgList?size > 0) >
+                  <#list errorMsgList as errorMsg>
+ 						<label class="control-label" for="inputError" style="color:#dd4b39;width: 370px;max-width: 500px"><i class="fa fa-times-circle-o"></i> ${errorMsg}</label><br/>
+				  </#list>                 
+                  </#if>
+          </div>
+           <input type="submit" value="提交" style="margin-top: 25px ;margin-right: 10px;">
+             <a href="/exceltemplate/template.xlsx" download="template.xlsx">下载模板</a>
+    </form>
+  
+    </section> -->
+    
+      <#include "../common/errorMsg.html">
+  </div>
+ 
+</div>
+<!-- ./wrapper -->
+</body>
+<script>
+  //存放选中行的id的数组
+  var selected = [];
+  
+  //adminlte表格的对象
+  var datatable = null;
+  var formValidator = null;
+  
+  $(function () {
+		    
+	   var vm = new Vue({
+	 		el: '#fromCondition',
+		    methods: {
+		    	submitForm: function () {
+				  	datatable.draw();				
+		        }
+      	  }
+  	  })
+	   
+	   //校验器
+		formValidator = $("#fromCondition").validate(
+				{
+					onkeyup : false,
+					focusInvalid : false,  //错误时,错误选项不会得到焦点
+					focusCleanup : true,   //得到焦点时，清空错误提示信息
+					submitHandler : function() { //表单提交句柄,为一回调函数，带一个参数：form
+						vm.submitForm();
+					} ,
+					rules : {						
+						search_EQ_STRING_cardNum : {
+							maxlength:16,
+							minlength:16
+						}
+					},
+					messages : {
+						
+						search_EQ_STRING_cardNum : {
+							maxlength:"卡号必须为16位",
+							minlength:"卡号必须为16位"
+						}
+					} 
+				});
+       
+     
+	   datatable = $('#dataTable').DataTable({
+           'paging'      : true,
+           'lengthChange': true,
+           'searching'   : false,
+           'ordering'    : true,
+           'info'        : true,
+           'autoWidth'   : true,
+           "scrollX"		: true,
+           "scrollY"		: true ,  
+           "processing"	: true,
+           "serverSide"	: true,
+           "pagingType": "full_numbers",
+           "language": {
+               "lengthMenu":   "显示 _MENU_ 条记录",
+               "zeroRecords":  "没有符合条件的记录",
+               "info":         "第 _PAGE_ 页,共 _PAGES_ 页",
+               "infoEmpty":    "没有符合条件的记录",
+               "paginate": {
+            	   "first":     "第一页",
+            	   "next":      "下一页",
+            	   "previous":  "上一页",
+            	   "last":      "最后一页"
+                }           	  
+           },
+           //如果查询条件有校验，需要加这个
+           "preDrawCallback": function( settings ) {
+        	   if(!formValidator.valid()) {
+        		   return false;
+        	   }
+        	},
+           "drawCallback": function( settings ) {
+        	   //每次重画后,清空选中的记录
+	    		selected.splice(0,selected.length);
+           },
+           "ajax": {
+               "url": "/cloudpay/tranorder/getTranOrderListData",
+               "type": "POST",
+               "data": function ( d ) {
+            	  var formData = $("#fromCondition").serializeJson();
+            	  for(var obj in formData)  {
+            		  d[obj+""] = formData[obj];
+            	  }
+              }
+           },
+           "columns": [  
+			   { "data": "id", "orderable": false,"render":function(data, type, full, meta) {
+                       return  '<input type="checkbox" value="' + data + '">';
+               }} ,
+               { "data": "userId" },
+               { "data": "cardNum" },
+               { "data": "payFee" ,"render":function(data, type, full, meta) {
+            	   return new BigDecimal(data+"").multiply(new BigDecimal("0.01")).setScale(2, MathContext.ROUND_HALF_UP).toString();
+               }},
+               { "data": "outTradeNo" },
+               { "data": "termCode" },
+               { "data": "transactionTime"},
+               { "data": "createTime"},
+               { "data": "updateTime"},
+               { "data": "orgCode"},
+               { "data": "orgName"}
+              /*  { "data": "checkBoxId", "orderable": false,"render":function(data, type, full, meta) {
+            	   return  '<input type="checkbox" value="' + data + '">';
+               }} */
+              
+			]           
+         })  
+} );
+
+</script>
+ <script src="${resurcePath}/cloudpay/js/common/dataTable.js"></script>
+</html>

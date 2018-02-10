@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!-- Tell the browser to be responsive to screen width -->
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+<#include "../common/header.html">
+
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+	<div class="wrapper">
+		<!-- 	顶部和左侧菜单的jsp s -->
+		<#include "../common/menu.html">
+		<!-- 	顶部和左侧菜单的jsp e -->
+
+		<!-- Content Wrapper. Contains page content -->
+		<div class="content-wrapper">
+			<!-- Content Header (Page header) -->
+			<section class="content-header">
+				<h1>用户列表</h1>
+			</section>
+
+			<section class="content-header condition clearfix ">
+				<form action="#" id="fromCondition">
+					<div class="form-group">
+						<label>用户标识:</label> 
+						<input type="text" class="form-control" name="search_EQ_LONG_id">
+					</div>
+					<div class="form-group">
+						<label>用户姓名:</label> 
+						<input type="text" class="form-control" name="search_LK_STRING_account">
+					</div>
+					<div class="form-group">
+						<label>登录账号:</label> <input type="text" class="form-control" name="search_LK_STRING_userName">
+					</div>
+					<div class="form-group">
+						<label>手机号码:</label> <input type="text" class="form-control" name="search_LK_STRING_phone">
+					</div>
+					<div class="form-group">
+						<label>状态:</label> <select class="form-control select2"
+							style="width: 100%;" name="search_EQ_INTEGER_status">
+							<option selected="selected" value="">全部</option> 							
+							<#list statusMap?keys as key>
+								<option value="${key}">${statusMap[key]!}</option> 
+							</#list>
+						</select>
+					</div>
+					<!-- Date range -->
+					<div class="form-group">
+						<label>创建时间:</label>
+
+						<div class="input-group">
+							<div class="input-group-addon">
+								<i class="fa fa-calendar"></i>
+							</div>
+							<input type="text" class="form-control pull-right daterange"
+								name="search_DATERANGE_DATE_createTime" />
+						</div>
+						<!-- /.input group -->
+					</div>
+					<!-- /.form group -->
+					<div class="form-group"
+						style="margin-top: 28px; margin-left: 15px;">
+						<input type="button" value="查询" id="submit" @click="submitForm" />&nbsp&nbsp
+						<input type="reset" value="清空" id="reset" />
+					</div>
+				</form>
+			</section>
+
+			<!-- Main content -->
+			<section class="content" style="padding-bottom: 0px;">
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="box">
+							<!-- /.box-header -->
+							<div class="box-body">
+								<table id="dataTable" class="table table-bordered table-striped"style="min-width: 1623px">
+									<thead id="thead1">
+										<tr>
+											<th>选择</th>
+											<th excel='true'>用户标识</th>
+											<th  excel='true'>用户姓名</th>
+											<th  excel='true'>登录账号</th>
+											<th  excel='true'>手机号码</th>
+											<th  excel='true'>状态</th>
+											<th  excel='true'>创建时间</th>
+											<th>操作</th>
+											
+										</tr>
+									</thead>
+								</table>
+							</div>
+							<!-- /.box-body -->
+						</div>
+						<!-- /.box -->
+					</div>
+					<!-- /.col -->
+				</div>
+				<!-- /.row -->
+			</section>
+			<!-- /.content -->
+
+
+			<section class="content-header condition clearfix " style="padding: 0px 14px">
+				<label class="control-label" id="errorLabel" for="inputError" style="color: #dd4b39; width: 370px; max-width: 500px"></label><br />
+				<button onclick="window.location.href='/cloudpay/admin/user/add';" class="btn btn-default" style="margin-right: 10px">新增用户</button>
+				<button onclick="effectiveStatus();" class="btn btn-default" style="margin-right: 10px">启用状态</button>
+				<button onclick="unEffectiveStatus();" class="btn btn-default" style="margin-right: 10px">停用状态</button>
+			</section>
+			
+			 <#include "../common/errorMsg.html">
+		</div>
+
+	</div>
+	<!-- ./wrapper -->
+</body>
+<script>
+  //存放选中行的id的数组
+  var selected = [];
+  
+  //adminlte表格的对象
+  var datatable = null;
+  var formValidator = null;
+  
+  $(function () {
+		    
+	   var vm = new Vue({
+	 		 el: '#fromCondition',
+		    methods: {
+		    	submitForm: function () {
+				  	datatable.draw();
+				  	//每次重画后,清空选中的记录
+		    		selected.splice(0,selected.length)
+		    	}
+      	  }
+  	  })
+	          
+      datatable = $('#dataTable').DataTable({
+           'paging'      : true,
+           'lengthChange': true,
+           'searching'   : false,
+           'ordering'    : true,
+           'info'        : true,
+           'autoWidth'   : true,
+           "scrollX"	 : true,
+           "scrollY"	 : true ,  
+           "processing"	 : true,
+           "serverSide"	 : true,
+           "pagingType": "full_numbers",
+           "initComplete": function(settings, json) {
+     
+           },
+           "language": {
+               "lengthMenu":   "显示 _MENU_ 条记录",
+               "zeroRecords":  "没有符合条件的记录",
+               "info":         "第 _PAGE_ 页,共 _PAGES_ 页",
+               "infoEmpty":    "没有符合条件的记录",
+               "paginate": {
+            	   "first":     "第一页",
+            	   "next":      "下一页",
+            	   "previous":  "上一页",
+            	   "last":      "最后一页"
+                }           	  
+           },
+           "preDrawCallback": function( settings ) {
+        	   if(!isEmpty(formValidator)) {
+        		   if(!formValidator.valid()) {
+            		   return false;
+            	   }
+        	   }  
+        	},
+           "drawCallback": function( settings ) {
+        	   //每次重画后,清空选中的记录
+	    		selected.splice(0, selected.length);
+           },
+           "ajax": {
+               "url": "/cloudpay/admin/user/listData",
+               "type": "POST",
+               "data": function ( d ) {
+            	  var formData = $("#fromCondition").serializeJson();
+            	  for(var obj in formData)  {
+            		  d[obj+""] = formData[obj];
+            	  }
+              }
+           },
+           "columns": [      
+			   { "data": "id", "orderable": false,"render":function(data, type, full, meta) {
+	                return  '<input type="checkbox" value="' + data + '">';
+               }} ,        
+               { "data": "id" },
+               { "data": "account"},
+               { "data": "userName"},
+               { "data": "phone"} ,
+               { "data": "status" ,
+	            	"render": function ( data, type, full, meta ) {     
+		           		<#list statusMap?keys as key>
+		         			if(data == '${key}') {
+		         				return '${statusMap[key]!}';
+		   					}
+						</#list>
+	  			}},
+               { "data": "createTime"},
+               { "data": "id",
+            	   "render": function ( data, type, full, meta ) {   
+            		   return '<button onclick="editInfo(' + data + ');" class="btn btn-default" style="margin-right: 10px">编辑信息</button> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp' +
+            		   '<button onclick="resetPassword(' + data + ');" class="btn btn-default" style="margin-right: 10px">重置密码</button> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp';
+            		   //'<a href="/admin/user/edit?id='+ data +'">编辑</a> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp' +            		 
+	  			}}
+			]
+         })
+         
+         //alert($(datatable.column(0).header()).html());
+       /*   console.log(  datatable.rows().every( function ( rowIdx, tableLoop, rowLoop ) {
+			    alert(1);
+			    var data = this.data();
+			    console.log(data);
+			    console.log("rowIdx:" + rowIdx)
+			    console.log("tableLoop:" + tableLoop)
+			    console.log("rowLoop:" + rowLoop)
+			    // ... do something with data(), or this.node(), etc
+			} ));
+	   datatable.rows().every( function ( rowIdx, tableLoop, rowLoop ) {
+			  alert(1);
+			    var data = this.data();
+			    console.log(data);
+			    console.log("rowIdx:" + rowIdx)
+			    console.log("tableLoop:" + tableLoop)
+			    console.log("rowLoop:" + rowLoop)
+			    // ... do something with data(), or this.node(), etc
+			} );
+         */
+});
+  
+ 
+  
+ /*  datatable.rows().every( function ( rowIdx, tableLoop, rowLoop ) {
+	  alert(1);
+	    var data = this.data();
+	    console.log(data);
+	    consolt.log("rowIdx:" + rowIdx)
+	    consolt.log("tableLoop:" + tableLoop)
+	    consolt.log("rowLoop:" + rowLoop)
+	    // ... do something with data(), or this.node(), etc
+	} ); */
+  
+function changeRole(userId) {
+	window.location.href = "/cloudpay/admin/toUserRolePage?userId=" + userId;
+}
+
+//<a type="button" value="编辑" onclick="editInfo(' + data + ')"/>'+'
+//编辑信息
+function editInfo(input){
+	//alert(input);
+	window.location.href="/cloudpay/admin/user/edit?id=" + input;
+}
+
+//重置密码 
+function resetPassword(input){
+	//alert("resetPassword = " + input);
+	var r = confirm("是否确定重置密码");
+	if (r == false)
+	{
+	    return;
+	}
+	
+	//发送ajax
+    $.ajax({
+        url: '/cloudpay/admin/user/resetPasswordAction',    
+        type: 'POST',
+        data: { id: input},
+        success: function (result) {    
+            var resultObj = JSON.parse(result);
+            if(resultObj.result_code == successRespCode)
+          	{
+           	 	alert("重置密码成功");
+           	 	window.location.href='/cloudpay/admin/user/list';
+           	 	//datatable.draw();
+          	}
+            else
+            {
+           	 	$("#errorLabel").html(resultObj.err_msg);
+            }
+        },
+        error: function (result) {    
+            alert("重置密码请求失败 = " + JSON.stringify(result));    
+        }    
+   });
+	
+}
+
+//设置为有效
+function effectiveStatus(){
+	//alert("effectiveStatus = "  + selected.length);
+	var r = confirm("是否全部置为有效");
+	if (r == false)
+	{
+	    return;
+	}
+	
+	  $.ajax({
+			 url : '/cloudpay/admin/user/statusToEffectiveAction',
+			 type : "POST",
+			 async:false,
+			 dataType : "json",
+			 data : {recordIds:selected},
+			 success : function(result) {
+				 //如果返回成功
+				 if(result.result_code == successRespCode) {
+					 alert("置为有效成功");
+					 //datatable.draw();
+		           	 window.location.href='/cloudpay/admin/user/list';
+				 } else {
+					 alert(result.err_msg);
+				 }
+			 },
+		     error: function (result) {    
+		          alert("置为有效请求失败 = " + JSON.stringify(result));    
+		     }
+		 });
+	
+}
+
+//设置为无效
+function unEffectiveStatus(){
+	//alert("unEffectiveStatus = " + selected.length);
+	var r = confirm("是否全部置为无效");
+	if (r == false)
+	{
+	    return;
+	}
+	
+	  $.ajax({
+			 url : '/cloudpay/admin/user/statusToUneffectiveAction',
+			 type : "POST",
+			 async:false,
+			 dataType : "json",
+			 data : {recordIds:selected},
+			 success : function(result) {
+				 //如果返回成功
+				 if(result.result_code == successRespCode) {
+					 alert("置为无效成功");
+					 //datatable.draw();
+					 window.location.href='/cloudpay/admin/user/list';
+				 } else {
+					 alert(result.err_msg);
+				 }
+			 },
+		     error: function (result) {    
+		          alert("置为无效请求失败 = " + JSON.stringify(result));    
+		     }
+		 });
+}
+  
+</script>
+<script src="${resurcePath}/cloudpay/js/common/dataTable.js"></script>
+</html>
+

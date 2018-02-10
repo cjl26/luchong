@@ -1,0 +1,55 @@
+server.port=8123
+
+#Basic Spring Boot Config for Oracle
+spring.datasource.url=jdbc:oracle:thin:@10.240.1.199:1521:ac
+spring.datasource.username=wxpub
+spring.datasource.password=wxpub
+spring.datasource.driver-class-name=oracle.jdbc.driver.OracleDriver
+spring.datasource.test-on-borrow=true
+spring.datasource.validation-query=SELECT 1 FROM DUAL
+spring.datasource.validation-interval=30000
+spring.datasource.validation-query-timeout=3000
+spring.datasource.time-between-eviction-runs-millis=60000
+spring.datasource.min-evictable-idle-time-millis=600000
+
+#hibernate config
+spring.jpa.database-platform=org.hibernate.dialect.Oracle10gDialect
+
+#for debugging
+yctapi.common.verifySignOn=true
+#spring.jpa.properties.hibernate.show_sql=true
+#spring.jpa.properties.hibernate.format_sql=true
+
+#qqpay cert directory
+qqpay.ca.path=/opt/yctapi/certs/qpay/cacert.pem
+qqpay.cert.path=/opt/yctapi/certs/qpay/1301278501_269167.pfx
+qqpay.cert.passwd=269167
+#qqpay.cert.path=D:/yct_projs/yct_api/qqpaycert/1900000109.pfx
+#qqpay.cert.passwd=532398
+#weixin cert directory
+wxin.cert.name.native=1367796702
+wxin.cert.name.sdk=1319413401
+wxin.cert.path=/opt/yctapi/certs/wxin/
+
+#yctapi_czj_url=http://10.240.3.166:8122/gw/product
+yctapi_czj_url=http://10.240.13.204/gw/product
+
+#网络代理
+yct.proxy.proxyOn=false
+#yct.proxy.server.http.ip=10.240.19.65
+#yct.proxy.server.http.port=8080
+yct.proxy.server.http.ip=10.240.1.22
+yct.proxy.server.http.port=8888
+#yct.proxy.server.https.ip=10.240.19.65
+yct.proxy.server.https.ip=10.240.1.22
+yct.proxy.server.https.port=8888
+
+#收到发货通知时是否反向查询该订单是否已支付
+yct.paycenter.noti.checkPayOn=false
+#SDK APPLY前是否去相应订单系统查询该订单情况
+yct.paycenter.sdkappy.checkOrderOn=false
+
+#合作商户获取signkey URL
+yctapi.common.partner.getSignKey.url=http://10.240.1.22:8125/partner/getsignkey
+#合作商户验证权限URL
+yctapi.common.partner.permit.url=http://10.240.1.22:8125/partner/permit

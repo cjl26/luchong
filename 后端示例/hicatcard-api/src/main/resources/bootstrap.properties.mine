@@ -1,0 +1,7 @@
+#eureka.ip=127.0.0.1
+eureka.ip=10.240.1.22
+eureka.client.serviceUrl.defaultZone=http://yctapp:YCTapp789@${eureka.ip}:8318/eureka/
+spring.cloud.config.discovery.enabled=false
+spring.cloud.config.discovery.service-id=config-server
+spring.cloud.config.name=student
+spring.cloud.config.profile=dev

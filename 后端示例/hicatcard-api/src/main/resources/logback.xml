@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="10 seconds">
+			<!-- https://logback.qos.ch/manual/appenders.html#TriggeringPolicy -->
+
+	<conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender" level="DEBUG">
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</pattern>
+		</encoder>
+	</appender>
+
+    <!--按日期分割日志文件-->
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>${catalina.home:-.}/logs/hicard.log</File>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<FileNamePattern>${catalina.home:-.}/logs/hicard.%d{yyyy-MM-dd_HH}.log</FileNamePattern>
+			<maxHistory>720</maxHistory>
+			<totalSizeCap>5GB</totalSizeCap>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</pattern>
+		</encoder>
+	</appender>
+
+    <!--按大小分割日志文件-->
+    <!--<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+        <!--<File>${catalina.home:-.}/logs/hicard.log</File>-->
+        <!--<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">-->
+            <!--<fileNamePattern>${catalina.home:-.}/logs/hicard.%i.log</fileNamePattern>-->
+            <!--<minIndex>1</minIndex>-->
+            <!--<maxIndex>10</maxIndex>-->
+        <!--</rollingPolicy>-->
+        <!--<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">-->
+            <!--<maxFileSize>1MB</maxFileSize>-->
+        <!--</triggeringPolicy>-->
+        <!--<encoder>-->
+            <!--<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } -&#45;&#45; [%t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</pattern>-->
+        <!--</encoder>-->
+    <!--</appender>-->
+
+	<appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>${catalina.home:-.}/logs/hicard-error.log</File>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<FileNamePattern>${catalina.home:-.}/logs/hicard-error.%d{yyyy-MM-dd}.log</FileNamePattern>
+			<maxHistory>90</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">
+			<level>ERROR</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter>
+	</appender>
+
+	<!--<appender name="DB" class="ch.qos.logback.classic.db.DBAppender">-->
+		<!--&lt;!&ndash;日志异步到数据库 &ndash;&gt;-->
+		<!--<connectionSource class="ch.qos.logback.core.db.DriverManagerConnectionSource">-->
+			<!--&lt;!&ndash;连接池 &ndash;&gt;-->
+			<!--&lt;!&ndash;<dataSource class="com.mchange.v2.c3p0.ComboPooledDataSource">&ndash;&gt;-->
+			<!--<driverClass>com.mysql.jdbc.Driver</driverClass>-->
+			<!--<url>jdbc:mysql://120.25.206.117:3306/hicatapilog?useSSL=false&amp;characterEncoding=utf-8</url>-->
+			<!--<user>funds</user>-->
+			<!--<password>funds123456</password>-->
+			<!--&lt;!&ndash; <sqlDialect class="ch.qos.logback.core.db.dialect.MySQLDialect"></sqlDialect> &ndash;&gt;-->
+			<!--&lt;!&ndash;</dataSource>&ndash;&gt;-->
+		<!--</connectionSource>-->
+	<!--</appender>-->
+
+
+	<logger name="com.gzyct" level="DEBUG" />
+
+	<root level="INFO">
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="FILE" />
+		<appender-ref ref="ERROR" />
+		<!--<appender-ref ref="DB" />-->
+	</root>
+</configuration>
